@@ -2,6 +2,7 @@
 # Python language
 # -----------------------------------------------
 
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -269,3 +270,5 @@ rsconnect/
 # -----------------------------------------------
 
 ds006018/
+ds006018_per_stimuli/
+ds006018_functional/
