@@ -1,0 +1,15 @@
+# Ignore git internals (can be huge and irrelevant)
+.git/
+**/.git/
+
+# Ignore compressed data archives
+*.zip
+
+# Ignore Jupyter temporary files
+**/.ipynb_checkpoints/
+
+# Prevent renv from scanning massive EEG datasets (~70GB total),
+# which would slow dependency discovery and produce false positives
+ds006018/
+ds006018_per_stimuli/
+ds006018_functional/
