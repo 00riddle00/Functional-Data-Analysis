@@ -130,7 +130,7 @@ par(opar)
 #  square root of a line with negative values:  illegal
 
 a = 0.5
-fdrootobj = tstFn1^a
+#fdrootobj = tstFn1^a  # <-- Uncomment to test it
 #Error in `^.fd`(tstFn1, a) :
 #  There are negative values and the power is a positive fraction.
 
@@ -159,7 +159,7 @@ par(opar)
 #  reciprocal of a function with zero values:  illegal operation
 
 a    = (-1)
-fdinvobj = tstFn1^a
+#fdinvobj = tstFn1^a  # <-- Uncomment to test it
 # Error in `^.fd`(tstFn1, a) :
 #   There are zero or negative values and the power is negative.
 
@@ -190,8 +190,8 @@ plot(fdpowobj,     lwd=2, xlab="", ylab="(fdsqrobj+1)^(-0.99)")
 par(opar)
 
 #  division does not work for curves
-fddivobj = tstFn2/tstFn1
-fddivobj = tstFn2/(tstFn1+2)
+#fddivobj = tstFn2/tstFn1  # <-- Uncomment to test it
+#fddivobj = tstFn2/(tstFn1+2)  # <-- Uncomment to test it
 
 ev1 <- eval.fd(seq(0,1,length=1000), tstFn1)
 ev1a <- eval.fd(seq(0,1,length=1000), tstFn1+2)

@@ -7,19 +7,19 @@
 
 #  Remarks and disclaimers
 
-#  These R commands are either those in this book, or designed to 
+#  These R commands are either those in this book, or designed to
 #  otherwise illustrate how R can be used in the analysis of functional
-#  data.  
-#  We do not claim to reproduce the results in the book exactly by these 
+#  data.
+#  We do not claim to reproduce the results in the book exactly by these
 #  commands for various reasons, including:
 #    -- the analyses used to produce the book may not have been
 #       entirely correct, possibly due to coding and accuracy issues
-#       in the functions themselves 
-#    -- we may have changed our minds about how these analyses should be 
+#       in the functions themselves
+#    -- we may have changed our minds about how these analyses should be
 #       done since, and we want to suggest better ways
 #    -- the R language changes with each release of the base system, and
 #       certainly the functional data analysis functions change as well
-#    -- we might choose to offer new analyses from time to time by 
+#    -- we might choose to offer new analyses from time to time by
 #       augmenting those in the book
 #    -- many illustrations in the book were produced using Matlab, which
 #       inevitably can imply slightly different results and graphical
@@ -66,8 +66,8 @@ plot(fourier.basis)
 fourier.basis = create.fourier.basis(unitRng, nbasis=5, period=2)
 plot(fourier.basis)
 
-bspline.basis = create.bspline.basis(unitRng, nbasis=5, 
-                                     norder=2, 
+bspline.basis = create.bspline.basis(unitRng, nbasis=5,
+                                     norder=2,
                                      breaks=seq(0, 1, length=5) )
 plot(bspline.basis)
 
@@ -94,7 +94,7 @@ T_size        = 500
 daybasis.T = create.fourier.basis(yearRng, 3, period=T_size)
 plot(daybasis.T)
 
-# dropindthat contains a vector of indices 
+# dropindthat contains a vector of indices
 # of basis functions to remove from the final series
 zerobasis  = create.fourier.basis(yearRng, 65, dropind=1)
 all.equal(zerobasis, daybasis65)
@@ -133,14 +133,17 @@ par(opar)
 bspline4 = create.bspline.basis(breaks=c(0, .5, 1))
 
 # knots and knots.fd do not work for the moment
-knots.fd(bspline4, interior=FALSE)
-?knots.fd
+# knots.fd(bspline4, interior=FALSE)
+# [1] 0.0 0.5 1.0 <-- this is what it would've printed
+# Another way to do the same:
+allKnots = c(bspline4$rangeval[1], bspline4$params, bspline4$rangeval[2])
+allKnots
 
 # number of basis functions = order + number of interior knots.
-# if we define a function over [0,1] with a single interior break point at 0.5 with cubic 
+# if we define a function over [0,1] with a single interior break point at 0.5 with cubic
 # splinebasis (order 4), then the knots are (0, 0, 0, 0, 0.5, 1, 1, 1, 1)
 nord <- norder(bspline4)
-rng <- bspline4$rangeval 
+rng <- bspline4$rangeval
 int <- bspline4$params
 nord; rng; int
 allKnots <- c(rep(rng[1], nord), int, rep(rng[2], nord))
@@ -149,10 +152,10 @@ allKnots
 # we may write our own function for knots:
 knots.fda <- function(Fn, interior=TRUE) {
   if(!class(bspline4) == "basisfd") stop("Object mus be of class basisfd")
-  
+
   int <- Fn$params
   if(interior == TRUE) return(int)
-  
+
   if(interior != TRUE) {
     nord <- norder(Fn)
     rng <- Fn$rangeval
@@ -182,7 +185,7 @@ plot(bspline2.2, lwd=2)
 
 #  order 4 spline, 3 equal interior knots
 
-bspline4.2 = create.bspline.basis(breaks=c(0, .5, .5, .5, 1), norder=2)
+bspline4.3 = create.bspline.basis(breaks=c(0, .5, .5, .5, 1), norder=2)
 knots.fda(bspline4.3, interior=FALSE)
 
 plot(bspline4.3, lwd=2)
@@ -195,7 +198,7 @@ knots.fda(splinebasis)
 
 # Figure 3.1
 
-plot(splinebasis, xlab='t', ylab='Bspline basis functions B(t)', 
+plot(splinebasis, xlab='t', ylab='Bspline basis functions B(t)',
      las=1, lwd=2)
 
 # Figure 3.2
@@ -325,3 +328,4 @@ all.equal(monbmat.1, monbmat.1.)
 
 Dmonbmat.1. = predict(monb, t.1, 1)
 all.equal(Dmonbmat.1, Dmonbmat.1.)
+

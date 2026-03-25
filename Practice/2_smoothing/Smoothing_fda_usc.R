@@ -40,7 +40,7 @@ out0$numbasis.opt
 
 opar <- par(mfrow=c(1,2))
 plot(out0$fdataobj)
-plot(l, out0$gcv["27",], type = "l", 
+plot(l, out0$gcv["27",], type = "l",
      xlab = "Smoothing parameter", ylab = "GCV",
      main = "GCV for 27 basis functions")
 par(opar)
@@ -59,8 +59,8 @@ out1$h.opt # optimal window h
 # Cosine kernel, window grid h taken from normal kernel
 # estimated earlier for comparison
 out1a <- optim.np(learn, h = out1$h,
-                  Ker = Ker.cos, 
-                  type.S = S.NW, 
+                  Ker = Ker.cos,
+                  type.S = S.NW,
                   par.CV = list(criteria = "GCV"),
                   correl = FALSE,
                   verbose = TRUE)
@@ -68,37 +68,37 @@ out1a <- optim.np(learn, h = out1$h,
 # Epanechnikov kernel, window grid h taken from normal kernel
 # estimated earlier for comparison
 out1b <- optim.np(learn, h = out1$h,
-                  Ker = Ker.epa, 
-                  type.S = S.NW, 
+                  Ker = Ker.epa,
+                  type.S = S.NW,
                   par.CV = list(criteria = "GCV"),
-                  correl = FALSE,   
+                  correl = FALSE,
                   verbose = TRUE)
 
 # Triweight kernel, window grid h taken from normal kernel
 # estimated earlier for comparison
 out1c <- optim.np(learn, h = out1$h,
-                  Ker = Ker.tri, 
-                  type.S = S.NW, 
+                  Ker = Ker.tri,
+                  type.S = S.NW,
                   par.CV = list(criteria = "GCV"),
-                  correl = FALSE,   
+                  correl = FALSE,
                   verbose = TRUE)
 
 # Quartic kernel, window grid h taken from normal kernel
 # estimated earlier for comparison
 out1d <- optim.np(learn, h = out1$h,
-                  Ker = Ker.quar, 
-                  type.S = S.NW, 
+                  Ker = Ker.quar,
+                  type.S = S.NW,
                   par.CV = list(criteria = "GCV"),
-                  correl = FALSE,   
+                  correl = FALSE,
                   verbose = TRUE)
 
 # Uniform kernel, window grid h taken from normal kernel
 # estimated earlier for comparison
 out1e <- optim.np(learn, h = out1$h,
-                  Ker = Ker.unif, 
-                  type.S = S.NW, 
+                  Ker = Ker.unif,
+                  type.S = S.NW,
                   par.CV = list(criteria = "GCV"),
-                  correl = FALSE,   
+                  correl = FALSE,
                   verbose = TRUE)
 
 # Local Linear Smoothing with bandwidth parameter h.
@@ -112,10 +112,10 @@ out2$h.opt
 ### plot GCV criteria
 ###################################################
 opar <- par(mfrow = c(1,2))
-contour(nb, l, out0$gcv, ylab = "Lambda", xlab = "Number of basis", 
+contour(nb, l, out0$gcv, ylab = "Lambda", xlab = "Number of basis",
         main = "GCV criteria by optim.basis()")
 plot(out1$h, out1$gcv, type = "l",, ylim = c(1.5, 9.5),
-     main = "GCV criteria  by optim.np() ", 
+     main = "GCV criteria  by optim.np() ",
      xlab = "Bandwidth (h) values",ylab = "GCV criteria", col = 1, lwd = 2)
 legend(x = 3, y = 9, legend = c("Ker.norm-S.NW", "Ker.norm-S.LLR",
                                 "Ker.cos-S.NW", "Ker.epa-S.NW",
@@ -160,8 +160,8 @@ lines(out1e$fdata.est[ind, ], col = cols[8], lty = 1, lwd = 2)
 
 
 ###################################################
-### Calculation of the smoothing parameter (h) 
-### for a functional data using nonparametric 
+### Calculation of the smoothing parameter (h)
+### for a functional data using nonparametric
 ### kernel estimation.
 ###################################################
 hgrid <- h.default(learn, prob = c(0.025, 0.5), len = 100)

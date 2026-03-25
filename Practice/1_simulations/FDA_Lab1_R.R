@@ -1,7 +1,7 @@
 #### A fair coint toss
 
 set.seed(25)
-x <- sample(c("H", "T"), size = 20, replace = TRUE) 
+x <- sample(c("H", "T"), size = 20, replace = TRUE)
 
 x
 
@@ -32,7 +32,7 @@ barplot(table(y))
 
 #### Probability distributions in R
 
-# The distributions of standard random variables are included in R. 
+# The distributions of standard random variables are included in R.
 # The main notation
 
 # * r - random
@@ -40,10 +40,10 @@ barplot(table(y))
 # * d - density
 # * p - distribution
 
-# are combined with the distribution namesand specific 
+# are combined with the distribution namesand specific
 # parameters for these distributions
 
-# * norm(mean, sd) 
+# * norm(mean, sd)
 # * exp(rate)
 # * pois(lambda)
 # * t(df, ncp)
@@ -55,19 +55,19 @@ barplot(table(y))
 
 # to create functions' names in R.
 
-# Note that normal distribution has two parameters - mean and variance - 
-# and is denoted by $X \sim N(\mu, \sigma^2)$, but in R one should write 
-# standard deviation instead of variance. Before working with distributions, 
+# Note that normal distribution has two parameters - mean and variance -
+# and is denoted by $X \sim N(\mu, \sigma^2)$, but in R one should write
+# standard deviation instead of variance. Before working with distributions,
 # check in the help parameters' values.
-# 
+#
 # See: Distributions in the stats package.
-# 
+#
 # Note: more distributions can be found in EnvStats, actuar and other packages.
-# 
+#
 # Thus for every distribution there are four commands. The commands for
 # each distribution are prepended with a letter to indicate the
 # functionality:
-#   
+#
 #   * d - returns values of the probability density function;
 
 z <- seq(-3, 3, by=0.1)
@@ -110,22 +110,22 @@ abline(h=0, col="red")
 
 hist(rn, freq = F)
 
-library(rcompanion) 
-plotNormalHistogram(rn, prob = TRUE, 
-                     main = "Normal Distribution overlay on Histogram", 
-                     length = 100) 
+library(rcompanion)
+plotNormalHistogram(rn, prob = TRUE,
+                     main = "Normal Distribution overlay on Histogram",
+                     length = 100)
 
-# Since in statistics we put a mathematical model for the real world situation, thus 
+# Since in statistics we put a mathematical model for the real world situation, thus
 
 # * population is defined by probability distribution
 # * we need to estimate parameters to get all the information about the population
-# * randomly generated numbers are simple random sample 
+# * randomly generated numbers are simple random sample
 # * in practice we have only one sample (the data set)
-# * putting the mathematical model we intentionally do "mistakes", 
+# * putting the mathematical model we intentionally do "mistakes",
 # since approximate estimation
-# is quicker to compute, than to derive a precise model for every situation. 
-# For example we model 
-# human's body mass or age using normal distribution, though body mass 
+# is quicker to compute, than to derive a precise model for every situation.
+# For example we model
+# human's body mass or age using normal distribution, though body mass
 # and height have only possitive
 # values, while normal distribution is defined on real values.
 
@@ -209,7 +209,7 @@ plot(t, y, type="l")
 J <- 10
 N <- 100
 set.seed(50)
-epsilon <- replicate(J, rnorm(N, 0, 1)) 
+epsilon <- replicate(J, rnorm(N, 0, 1))
 sigma <- 1
 i <- 1:N
 t <- i/100
@@ -291,29 +291,29 @@ FA.cca
 
 cca_df = refund.shiny::as_refundObj(FA.cca$cca)
 library(ggplot2)
-ggplot(cca_df, aes(x = index, y = value, group = id)) + 
+ggplot(cca_df, aes(x = index, y = value, group = id)) +
   geom_path(alpha = .5, color = "blue")
 
 
 
 library(tidyr)
 library(dplyr)
-dti_subset <- DTI %>% 
-  filter(visit == 1) %>% 
+dti_subset <- DTI %>%
+  filter(visit == 1) %>%
   drop_na(cca)
 
 # Convert to long format
 cca_long <- as.data.frame(dti_subset$cca) %>%
   mutate(id = dti_subset$ID, sex = dti_subset$sex, case = dti_subset$case,
          pasat = dti_subset$pasat) %>%
-  pivot_longer(cols = starts_with("cca"), 
-               names_to = "position", 
+  pivot_longer(cols = starts_with("cca"),
+               names_to = "position",
                values_to = "fa_value") %>%
   mutate(index = as.numeric(gsub("cca_", "", position))/93)
 
 ggplot(cca_long, aes(x = index, y = fa_value, group = id, color = sex)) +
-  geom_line(alpha = 0.3) + 
-  stat_summary(aes(group = sex), fun = mean, geom = "line", size = 1.5) +
+  geom_line(alpha = 0.3) +
+  stat_summary(aes(group = sex), fun = mean, geom = "line", linewidth = 1.5) +
   labs(title = "CCA trackt profile by sex",
        x = "Index",
        y = "FA",
@@ -322,7 +322,7 @@ ggplot(cca_long, aes(x = index, y = fa_value, group = id, color = sex)) +
 
 
 ggplot(cca_long, aes(x = index, y = fa_value, group = id, color = case)) +
-  geom_line() + 
+  geom_line() +
   labs(title = "CCA trackt profile by case",
        x = "Index",
        y = "FA",
@@ -332,16 +332,16 @@ ggplot(cca_long, aes(x = index, y = fa_value, group = id, color = case)) +
 library(plotly)
 cca_na <- na.omit(cca_long)
 cca_na$col <- floor(cca_na$pasat/10)
-p <- plot_ly(cca_na, 
-        x = ~index, 
-        y = ~pasat, 
-        z = ~fa_value, 
-        split = ~id,      
+p <- plot_ly(cca_na,
+        x = ~index,
+        y = ~pasat,
+        z = ~fa_value,
+        split = ~id,
         #color = ~col,
-        type = 'scatter3d', 
-        mode = 'lines', 
+        type = 'scatter3d',
+        mode = 'lines',
         line = list(width = 2),
-        opacity = 0.5) %>%  
+        opacity = 0.5) %>%
   layout(title = "FA profiles according to pasat",
          scene = list(xaxis = list(title = "distance along tract"),
                       yaxis = list(title = "PASAT"),
