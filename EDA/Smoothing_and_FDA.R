@@ -1,12 +1,16 @@
 library(readxl)
 
+# Create output directory if it doesn't exist
+out_dir <- file.path("./EDA/outputs")
+dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+
 # Read the data
-dat <- read_excel("C:/Users/berzi/OneDrive/Desktop/sub FC1 data/Flanker_stimulus_FC1_channel.xlsx")
+dat <- read_excel("./EDA/Flanker_stimulus_FC1_channel.xlsx")
 
 time_vec <- dat$time
 Y_mat    <- as.matrix(dat[, -1])
 
-pdf("00_all_curves.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "00_all_curves.pdf"), width = 10, height = 6)
 matplot(time_vec, Y_mat, type = "l", lty = 1,
         col = adjustcolor("steelblue", 0.4),
         xlab = "Time (s)", ylab = "Amplitude (µV)",
@@ -25,7 +29,6 @@ dev.off()
 # Flanker Task EEG — Channel FC1 — 39 Subjects
 ################################################################################
 
-rm(list = ls())
 library(fda)
 library(readxl)
 
@@ -33,7 +36,8 @@ library(readxl)
 # Load data
 # ==============================================================================
 
-dat      <- read_excel("C:/Users/berzi/OneDrive/Desktop/sub FC1 data/Flanker_stimulus_FC1_channel.xlsx")
+dat      <- read_excel("./EDA/Flanker_stimulus_FC1_channel.xlsx")
+
 time_vec <- dat$time
 Y_mat    <- as.matrix(dat[, -1])
 
@@ -84,7 +88,7 @@ cat("Optimal df:           ", dfsave[best_idx], "\n")
 cat("==================\n")
 
 # Plot GCV curve
-pdf("01_gcv_lambda.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "01_gcv_lambda.pdf"), width = 10, height = 6)
 plot(loglam, gcvsave, type = "b", lwd = 2,
      ylab = "GCV Criterion",
      xlab = expression(log[10](lambda)),
@@ -108,7 +112,7 @@ fd_smooth     <- smooth_result$fd
 # Plot: before vs after smoothing
 # ==============================================================================
 
-pdf("02_before_after_smoothing.pdf", width = 12, height = 6)
+pdf(file.path(out_dir, "02_before_after_smoothing.pdf"), width = 12, height = 6)
 opar <- par(mfrow = c(1, 2))
 
 matplot(time_vec, Y_mat, type = "l", lty = 1,
@@ -130,7 +134,7 @@ cat("Saved: 02_before_after_smoothing.pdf\n")
 # Plot: one subject close-up (raw vs smoothed)
 # ==============================================================================
 
-pdf("03_single_subject_fit.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "03_single_subject_fit.pdf"), width = 10, height = 6)
 sub_idx <- 2  # SUB2
 y_raw   <- Y_mat[, sub_idx]
 y_fit   <- eval.fd(time_vec, fd_smooth[sub_idx])
@@ -151,9 +155,9 @@ cat("Saved: 03_single_subject_fit.pdf\n")
 # Save the fd object for later use in EDA
 # ==============================================================================
 
-saveRDS(fd_smooth, "fd_smooth.rds")
-cat("\nSmoothed fd object saved to: fd_smooth.rds\n")
-cat("Use fd_smooth <- readRDS('fd_smooth.rds') in the EDA script.\n")
+saveRDS(fd_smooth, file.path(out_dir, "fd_smooth.rds"))
+cat("\nSmoothed fd object saved to:", file.path(out_dir, "fd_smooth.rds"), "\n")
+cat("Use fd_smooth <- readRDS(file.path(out_dir, 'fd_smooth.rds')) in the EDA script.\n")
 
 
 
@@ -177,7 +181,7 @@ library(rainbow)
 library(fields)
 
 # Load the smoothed fd object from Step 1
-fd_smooth <- readRDS("C:/Users/berzi/OneDrive/Desktop/sub FC1 data/fd_smooth.rds")
+fd_smooth <- readRDS(file.path(out_dir, "fd_smooth.rds"))
 
 # Evaluate on a fine grid (for fdaoutlier and rainbow functions)
 t_fine <- seq(fd_smooth$basis$rangeval[1],
@@ -194,7 +198,7 @@ Y_eval <- eval.fd(t_fine, fd_smooth)
 meanfd <- mean.fd(fd_smooth)
 sdfd   <- std.fd(fd_smooth)
 
-pdf("04_mean_sd.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "04_mean_sd.pdf"), width = 10, height = 6)
 plot(fd_smooth, col = "gray", lty = 1,
      xlab = "Time (s)", ylab = "Amplitude (uV)",
      main = "Mean and Standard Deviation")
@@ -217,7 +221,7 @@ t_grid  <- seq(fd_smooth$basis$rangeval[1],
                fd_smooth$basis$rangeval[2], length.out = 101)
 cov_mat <- eval.bifd(t_grid, t_grid, covbifd)
 
-pdf("05_covariance_persp.pdf", width = 10, height = 8)
+pdf(file.path(out_dir, "05_covariance_persp.pdf"), width = 10, height = 8)
 persp(t_grid, t_grid, cov_mat,
       theta = -45, phi = 25, r = 3, expand = 0.5,
       ticktype = "detailed",
@@ -225,13 +229,13 @@ persp(t_grid, t_grid, cov_mat,
       main = "Covariance Surface")
 dev.off()
 
-pdf("06_covariance_contour.pdf", width = 10, height = 8)
+pdf(file.path(out_dir, "06_covariance_contour.pdf"), width = 10, height = 8)
 contour(t_grid, t_grid, cov_mat,
         xlab = "Time s", ylab = "Time t",
         main = "Covariance Contour", lwd = 2)
 dev.off()
 
-pdf("07_covariance_image.pdf", width = 10, height = 8)
+pdf(file.path(out_dir, "07_covariance_image.pdf"), width = 10, height = 8)
 image.plot(t_grid, t_grid, cov_mat,
            xlab = "Time s", ylab = "Time t",
            main = "Covariance Surface")
@@ -244,33 +248,33 @@ dev.off()
 # (from 2_EDA_for_FDA2026.R lines 96-142)
 # ==============================================================================
 
-#fdataobj <- fdata(t(Y_eval), argvals = t_fine)
+fdataobj <- fdata(t(Y_eval), argvals = t_fine)
 
-#pdf("08_centrality_dispersion.pdf", width = 14, height = 7)
-#opar <- par(mfrow = c(1, 2))
+pdf(file.path(out_dir, "08_centrality_dispersion.pdf"), width = 14, height = 7)
+opar <- par(mfrow = c(1, 2))
 
-#plot(func.mean(fdataobj), ylim = range(Y_eval),
-#main = "Centrality Measures",
-#xlab = "Time (s)", ylab = "Amplitude (uV)")
-#legend("topright", cex = 0.7, box.col = "white", lty = 1:5,
-#col = 1:5,
-#legend = c("mean", "trim.mode", "trim.RP",
-#"median.mode", "median.RP"))
-#lines(func.trim.mode(fdataobj, trim = 0.15), col = 2, lty = 2)
-#lines(func.trim.RP(fdataobj, trim = 0.15),   col = 3, lty = 3)
-#lines(func.med.mode(fdataobj, trim = 0.15),  col = 4, lty = 4)
-#lines(func.med.RP(fdataobj, trim = 0.15),    col = 5, lty = 5)
+plot(func.mean(fdataobj), ylim = range(Y_eval),
+main = "Centrality Measures",
+xlab = "Time (s)", ylab = "Amplitude (uV)")
+legend("topright", cex = 0.7, box.col = "white", lty = 1:5,
+col = 1:5,
+legend = c("mean", "trim.mode", "trim.RP",
+"median.mode", "median.RP"))
+lines(func.trim.mode(fdataobj, trim = 0.15), col = 2, lty = 2)
+lines(func.trim.RP(fdataobj, trim = 0.15),   col = 3, lty = 3)
+lines(func.med.mode(fdataobj, trim = 0.15),  col = 4, lty = 4)
+lines(func.med.RP(fdataobj, trim = 0.15),    col = 5, lty = 5)
 
-#plot(func.var(fdataobj),
-#main = "Dispersion Measures",
-#xlab = "Time (s)", ylab = "Variance")
-#legend("topright", cex = 0.7, box.col = "white", lty = 1:3, col = 1:3,
-#legend = c("var", "trimvar.mode", "trimvar.RP"))
-#lines(func.trimvar.mode(fdataobj, trim = 0.15), col = 2, lty = 2)
-#lines(func.trimvar.RP(fdataobj, trim = 0.15),   col = 3, lty = 3)
+plot(func.var(fdataobj),
+main = "Dispersion Measures",
+xlab = "Time (s)", ylab = "Variance")
+legend("topright", cex = 0.7, box.col = "white", lty = 1:3, col = 1:3,
+legend = c("var", "trimvar.mode", "trimvar.RP"))
+lines(func.trimvar.mode(fdataobj, trim = 0.15), col = 2, lty = 2)
+lines(func.trimvar.RP(fdataobj, trim = 0.15),   col = 3, lty = 3)
 
-#par(opar)
-#dev.off()
+par(opar)
+dev.off()
 
 
 # ==============================================================================
@@ -278,15 +282,15 @@ dev.off()
 # (from 4_Boxplots_and_outliers2026.R lines 17-22)
 # ==============================================================================
 
-pdf("09_depth_FM.pdf", width = 10, height = 8)
+pdf(file.path(out_dir, "09_depth_FM.pdf"), width = 10, height = 8)
 out.FM <- depth.FM(fdataobj, trim = 0.1, draw = TRUE)
 dev.off()
 
-pdf("10_depth_mode.pdf", width = 10, height = 8)
+pdf(file.path(out_dir, "10_depth_mode.pdf"), width = 10, height = 8)
 out.mode <- depth.mode(fdataobj, trim = 0.1, draw = TRUE)
 dev.off()
 
-pdf("11_depth_RP.pdf", width = 10, height = 8)
+pdf(file.path(out_dir, "11_depth_RP.pdf"), width = 10, height = 8)
 out.RP <- depth.RP(fdataobj, trim = 0.1, draw = TRUE)
 dev.off()
 
@@ -303,16 +307,16 @@ cat("\nVariance proportions:\n")
 print(pcalist$varprop)
 cat("Cumulative:", cumsum(pcalist$varprop), "\n")
 
-pdf("12_pca_plot.pdf", width = 10, height = 8)
+pdf(file.path(out_dir, "12_pca_plot.pdf"), width = 10, height = 8)
 plot(pcalist)
 dev.off()
 
-pdf("13_pca_harmonics.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "13_pca_harmonics.pdf"), width = 10, height = 6)
 plot(pcalist$harmonics)
 dev.off()
 
-pdf("14_pca_scores.pdf", width = 8, height = 6)
-plotscores(pcalist, loc = 5)
+pdf(file.path(out_dir, "14_pca_scores.pdf"), width = 8, height = 6)
+#plotscores(pcalist, loc = 5)
 dev.off()
 
 # --- Perturbation plots ---
@@ -321,14 +325,14 @@ dev.off()
 c <- 2
 mn <- pcalist$meanfd
 
-pdf("15_pca_perturbation.pdf", width = 12, height = 8)
+pdf(file.path(out_dir, "15_pca_perturbation.pdf"), width = 12, height = 8)
 opar <- par(mfrow = c(2, 2))
 for (k in 1:4) {
   phi    <- pcalist$harmonics[k]
   lambda <- pcalist$values[k]
   f1 <- mn - c * sqrt(lambda) * phi
   f2 <- mn + c * sqrt(lambda) * phi
-  
+
   plot(mn, ylim = range(eval.fd(t_fine, f1), eval.fd(t_fine, f2)),
        lwd = 2, xlab = "Time (s)", ylab = "Amplitude (uV)",
        main = paste0("PC", k, " (", round(pcalist$varprop[k] * 100, 1), "%)"))
@@ -342,39 +346,39 @@ dev.off()
 # --- PCA reconstruction of first 5 subjects ---
 # (from 3_PCA_for_FDA2026.R lines 42-80)
 
-pdf("16_pca_reconstruction.pdf", width = 12, height = 10)
+pdf(file.path(out_dir, "16_pca_reconstruction.pdf"), width = 12, height = 10)
 opar <- par(mfrow = c(2, 2))
 for (i in 1:5) {
   fd.pca1 <- mean.fd(fd_smooth) +
     pcalist$scores[i, 1] * pcalist$harmonics[1]
-  
+
   fd.pca2 <- mean.fd(fd_smooth) +
     pcalist$scores[i, 1] * pcalist$harmonics[1] +
     pcalist$scores[i, 2] * pcalist$harmonics[2]
-  
+
   fd.pca3 <- mean.fd(fd_smooth) +
     pcalist$scores[i, 1] * pcalist$harmonics[1] +
     pcalist$scores[i, 2] * pcalist$harmonics[2] +
     pcalist$scores[i, 3] * pcalist$harmonics[3]
-  
+
   fd.pca4 <- mean.fd(fd_smooth) +
     pcalist$scores[i, 1] * pcalist$harmonics[1] +
     pcalist$scores[i, 2] * pcalist$harmonics[2] +
     pcalist$scores[i, 3] * pcalist$harmonics[3] +
     pcalist$scores[i, 4] * pcalist$harmonics[4]
-  
+
   yrng <- range(eval.fd(t_fine, fd_smooth[i]))
-  
+
   plot(fd.pca1, ylim = yrng, ylab = "1 PC",
        main = paste0("Subject ", i))
   lines(fd_smooth[i], col = 2)
-  
+
   plot(fd.pca2, ylim = yrng, ylab = "2 PCs")
   lines(fd_smooth[i], col = 2)
-  
+
   plot(fd.pca3, ylim = yrng, ylab = "3 PCs")
   lines(fd_smooth[i], col = 2)
-  
+
   plot(fd.pca4, ylim = yrng, ylab = "4 PCs")
   lines(fd_smooth[i], col = 2)
 }
@@ -392,16 +396,16 @@ varmx <- varmx.pca.fd(pcalist)
 cat("\nVARIMAX variance proportions:\n")
 print(varmx$varprop)
 
-pdf("17_varimax_plot.pdf", width = 10, height = 8)
+pdf(file.path(out_dir, "17_varimax_plot.pdf"), width = 10, height = 8)
 plot(varmx)
 dev.off()
 
-pdf("18_varimax_harmonics.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "18_varimax_harmonics.pdf"), width = 10, height = 6)
 plot(varmx$harmonics)
 dev.off()
 
-pdf("19_varimax_scores.pdf", width = 8, height = 6)
-plotscores(varmx, loc = 5)
+pdf(file.path(out_dir, "19_varimax_scores.pdf"), width = 8, height = 6)
+#plotscores(varmx, loc = 5)
 dev.off()
 
 
@@ -410,17 +414,17 @@ dev.off()
 # (from 4_Boxplots_and_outliers2026.R lines 44, 99-103)
 # ==============================================================================
 
-pdf("20_boxplot_fd.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "20_boxplot_fd.pdf"), width = 10, height = 6)
 boxplot(fd_smooth)
 dev.off()
 
-pdf("21_fbplot_MBD.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "21_fbplot_MBD.pdf"), width = 10, height = 6)
 fbplot(Y_eval, method = "MBD",
        xlab = "Time (s)", ylab = "Amplitude (uV)",
        main = "Functional Boxplot (MBD)")
 dev.off()
 
-pdf("22_fbplot_BD2.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "22_fbplot_BD2.pdf"), width = 10, height = 6)
 fbplot(Y_eval, method = "BD2",
        xlab = "Time (s)", ylab = "Amplitude (uV)",
        main = "Functional Boxplot (BD2)")
@@ -442,19 +446,19 @@ names(mbd) <- colnames(fd_smooth$coefs)
 cat("\nModified Band Depth:\n")
 print(mbd)
 
-pdf("23_band_depths.pdf", width = 12, height = 6)
+pdf(file.path(out_dir, "23_band_depths.pdf"), width = 12, height = 6)
 opar <- par(mfrow = c(1, 2))
 plot(bd,  type = "l", main = "Band Depth",         xlab = "Subject", ylab = "BD")
 plot(mbd, type = "l", main = "Modified Band Depth", xlab = "Subject", ylab = "MBD")
 par(opar)
 dev.off()
 
-pdf("24_fdaoutlier_fbplot_bd.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "24_fdaoutlier_fbplot_bd.pdf"), width = 10, height = 6)
 fbplot_bd <- functional_boxplot(t(Y_eval), depth_method = "bd")
 dev.off()
 cat("\nOutliers (BD):", fbplot_bd$outliers, "\n")
 
-pdf("25_fdaoutlier_fbplot_mbd.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "25_fdaoutlier_fbplot_mbd.pdf"), width = 10, height = 6)
 fbplot_mbd <- functional_boxplot(t(Y_eval), depth_method = "mbd")
 dev.off()
 cat("Outliers (MBD):", fbplot_mbd$outliers, "\n")
@@ -472,7 +476,7 @@ m <- muod(t(Y_eval), cut_method = "boxplot")
 cat("\nMUOD outliers:\n")
 print(m$outliers)
 
-pdf("26_muod.pdf", width = 12, height = 4)
+pdf(file.path(out_dir, "26_muod.pdf"), width = 12, height = 4)
 opar <- par(mfrow = c(1, 3))
 plot(m$indices$shape,     type = "h", main = "Shape Index",     xlab = "Subject", ylab = "IS")
 plot(m$indices$magnitude, type = "h", main = "Magnitude Index", xlab = "Subject", ylab = "IM")
@@ -489,11 +493,11 @@ dev.off()
 fds_obj <- fds(x = t_fine, y = Y_eval,
                xname = "Time (s)", yname = "Amplitude (uV)")
 
-pdf("27_rainbow_functions.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "27_rainbow_functions.pdf"), width = 10, height = 6)
 plot(fds_obj, plot.type = "functions", plotlegend = TRUE)
 dev.off()
 
-pdf("28_rainbow_depth.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "28_rainbow_depth.pdf"), width = 10, height = 6)
 plot(fds_obj, plot.type = "depth", plotlegend = TRUE)
 dev.off()
 
@@ -503,12 +507,12 @@ dev.off()
 # (from 5_Rainbow2026.R lines 138-142)
 # ==============================================================================
 
-pdf("29_bagplot_bivariate.pdf", width = 8, height = 8)
+pdf(file.path(out_dir, "29_bagplot_bivariate.pdf"), width = 8, height = 8)
 fboxplot(fds_obj, plot.type = "bivariate",
          type = "bag", projmethod = "PCAproj")
 dev.off()
 
-pdf("30_bagplot_functional.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "30_bagplot_functional.pdf"), width = 10, height = 6)
 fboxplot(fds_obj, plot.type = "functional",
          type = "bag", projmethod = "PCAproj")
 dev.off()
@@ -519,25 +523,25 @@ dev.off()
 # (from 5_Rainbow2026.R lines 63-87)
 # ==============================================================================
 
-pdf("31_hdr_bivariate_007.pdf", width = 8, height = 8)
+pdf(file.path(out_dir, "31_hdr_bivariate_007.pdf"), width = 8, height = 8)
 fboxplot(fds_obj, plot.type = "bivariate",
          type = "hdr", alpha = c(0.07, 0.5),
          projmethod = "PCAproj")
 dev.off()
 
-pdf("32_hdr_bivariate_005.pdf", width = 8, height = 8)
+pdf(file.path(out_dir, "32_hdr_bivariate_005.pdf"), width = 8, height = 8)
 fboxplot(fds_obj, plot.type = "bivariate",
          type = "hdr", alpha = c(0.05, 0.5),
          projmethod = "PCAproj")
 dev.off()
 
-pdf("33_hdr_functional_007.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "33_hdr_functional_007.pdf"), width = 10, height = 6)
 fboxplot(fds_obj, plot.type = "functional",
          type = "hdr", alpha = c(0.07, 0.5),
          projmethod = "PCAproj")
 dev.off()
 
-pdf("34_hdr_functional_005.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "34_hdr_functional_005.pdf"), width = 10, height = 6)
 fboxplot(fds_obj, plot.type = "functional",
          type = "hdr", alpha = c(0.05, 0.5),
          projmethod = "PCAproj")
@@ -549,7 +553,7 @@ dev.off()
 # (from 5_Rainbow2026.R lines 162-166)
 # ==============================================================================
 
-sink("35_foutliers_results.txt")
+sink(file.path(out_dir, "35_foutliers_results.txt"))
 cat("=== robMah ===\n")
 print(foutliers(fds_obj, method = "robMah"))
 cat("\n=== lrt ===\n")
