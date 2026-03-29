@@ -1,20 +1,34 @@
-library(readxl)
+# ==============================================================================
+#
+#  Smoothing and Functional EDA
+#  Flanker Task EEG — Channel FC1 — Stimulus S2
+#
+#  Input:  Flanker_stimulus_FC1_channel.csv (from assemble_subject_data.R)
+#  Output: 34 PDF plots + fd_smooth.rds + text results in outputs/
+#
+# ==============================================================================
 
 # Create output directory if it doesn't exist
 out_dir <- file.path("./EDA/outputs")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
-# Read the data
-dat <- read_excel("./EDA/Flanker_stimulus_FC1_channel.xlsx")
 
+# ==============================================================================
+# Step 0: Plot raw curves before smoothing
+# ==============================================================================
+
+library(fda)
+
+dat      <- read.csv("./EDA/Flanker_stimulus_FC1_channel.csv", check.names = FALSE)
 time_vec <- dat$time
 Y_mat    <- as.matrix(dat[, -1])
+n_subj   <- ncol(Y_mat)
 
 pdf(file.path(out_dir, "00_all_curves.pdf"), width = 10, height = 6)
 matplot(time_vec, Y_mat, type = "l", lty = 1,
         col = adjustcolor("steelblue", 0.4),
         xlab = "Time (s)", ylab = "Amplitude (µV)",
-        main = "Flanker Task — Channel FC1 — All 39 Subjects")
+        main = paste0("Flanker Task — Channel FC1 — All ", n_subj, " Subjects"))
 abline(v = 0, lty = 2, col = "red", lwd = 2)
 abline(h = 0, lty = 3, col = "grey50")
 legend("topleft",
@@ -26,24 +40,25 @@ dev.off()
 
 ################################################################################
 # Step 1: Smoothing
-# Flanker Task EEG — Channel FC1 — 39 Subjects
 ################################################################################
 
+rm(list = ls())
 library(fda)
-library(readxl)
+
+out_dir <- file.path("./EDA/outputs")
 
 # ==============================================================================
 # Load data
 # ==============================================================================
 
-dat      <- read_excel("./EDA/Flanker_stimulus_FC1_channel.xlsx")
-
+dat      <- read.csv("./EDA/Flanker_stimulus_FC1_channel.csv", check.names = FALSE)
 time_vec <- dat$time
 Y_mat    <- as.matrix(dat[, -1])
+n_subj   <- ncol(Y_mat)
 
 cat("Time points:", length(time_vec), "\n")
 cat("Time range: ", range(time_vec), "\n")
-cat("Subjects:   ", ncol(Y_mat), "\n")
+cat("Subjects:   ", n_subj, "\n")
 
 # ==============================================================================
 # Set up B-spline basis
@@ -135,13 +150,13 @@ cat("Saved: 02_before_after_smoothing.pdf\n")
 # ==============================================================================
 
 pdf(file.path(out_dir, "03_single_subject_fit.pdf"), width = 10, height = 6)
-sub_idx <- 2  # SUB2
+sub_idx <- 1
 y_raw   <- Y_mat[, sub_idx]
 y_fit   <- eval.fd(time_vec, fd_smooth[sub_idx])
 
 plot(time_vec, y_raw, type = "l", col = "grey60",
      xlab = "Time (s)", ylab = "Amplitude (µV)",
-     main = paste0("Subject ", sub_idx, ": Raw vs Smoothed"))
+     main = paste0("Subject ", colnames(Y_mat)[sub_idx], ": Raw vs Smoothed"))
 lines(time_vec, y_fit, col = "steelblue", lwd = 2)
 abline(v = 0, lty = 2, col = "red")
 legend("topleft",
@@ -160,19 +175,9 @@ cat("\nSmoothed fd object saved to:", file.path(out_dir, "fd_smooth.rds"), "\n")
 cat("Use fd_smooth <- readRDS(file.path(out_dir, 'fd_smooth.rds')) in the EDA script.\n")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+################################################################################
+# Step 2: Functional EDA
+################################################################################
 
 library(fda)
 library(fda.usc)
@@ -187,7 +192,7 @@ fd_smooth <- readRDS(file.path(out_dir, "fd_smooth.rds"))
 t_fine <- seq(fd_smooth$basis$rangeval[1],
               fd_smooth$basis$rangeval[2], length.out = 501)
 Y_eval <- eval.fd(t_fine, fd_smooth)
-
+n_subj <- ncol(Y_eval)
 
 
 # ==============================================================================
@@ -254,22 +259,22 @@ pdf(file.path(out_dir, "08_centrality_dispersion.pdf"), width = 14, height = 7)
 opar <- par(mfrow = c(1, 2))
 
 plot(func.mean(fdataobj), ylim = range(Y_eval),
-main = "Centrality Measures",
-xlab = "Time (s)", ylab = "Amplitude (uV)")
+     main = "Centrality Measures",
+     xlab = "Time (s)", ylab = "Amplitude (uV)")
 legend("topright", cex = 0.7, box.col = "white", lty = 1:5,
-col = 1:5,
-legend = c("mean", "trim.mode", "trim.RP",
-"median.mode", "median.RP"))
+       col = 1:5,
+       legend = c("mean", "trim.mode", "trim.RP",
+                  "median.mode", "median.RP"))
 lines(func.trim.mode(fdataobj, trim = 0.15), col = 2, lty = 2)
 lines(func.trim.RP(fdataobj, trim = 0.15),   col = 3, lty = 3)
 lines(func.med.mode(fdataobj, trim = 0.15),  col = 4, lty = 4)
 lines(func.med.RP(fdataobj, trim = 0.15),    col = 5, lty = 5)
 
 plot(func.var(fdataobj),
-main = "Dispersion Measures",
-xlab = "Time (s)", ylab = "Variance")
+     main = "Dispersion Measures",
+     xlab = "Time (s)", ylab = "Variance")
 legend("topright", cex = 0.7, box.col = "white", lty = 1:3, col = 1:3,
-legend = c("var", "trimvar.mode", "trimvar.RP"))
+       legend = c("var", "trimvar.mode", "trimvar.RP"))
 lines(func.trimvar.mode(fdataobj, trim = 0.15), col = 2, lty = 2)
 lines(func.trimvar.RP(fdataobj, trim = 0.15),   col = 3, lty = 3)
 
@@ -316,7 +321,12 @@ plot(pcalist$harmonics)
 dev.off()
 
 pdf(file.path(out_dir, "14_pca_scores.pdf"), width = 8, height = 6)
-#plotscores(pcalist, loc = 5)
+plot(pcalist$scores[, 1], pcalist$scores[, 2],
+     pch = 19, col = adjustcolor("steelblue", 0.6), cex = 1.2,
+     xlab = paste0("PC1 (", round(pcalist$varprop[1] * 100, 1), "%)"),
+     ylab = paste0("PC2 (", round(pcalist$varprop[2] * 100, 1), "%)"),
+     main = "fPCA Scores: PC1 vs PC2")
+abline(h = 0, v = 0, lty = 3, col = "grey50")
 dev.off()
 
 # --- Perturbation plots ---
@@ -370,7 +380,7 @@ for (i in 1:5) {
   yrng <- range(eval.fd(t_fine, fd_smooth[i]))
 
   plot(fd.pca1, ylim = yrng, ylab = "1 PC",
-       main = paste0("Subject ", i))
+       main = paste0("Subject ", colnames(fd_smooth$coefs)[i]))
   lines(fd_smooth[i], col = 2)
 
   plot(fd.pca2, ylim = yrng, ylab = "2 PCs")
@@ -405,7 +415,11 @@ plot(varmx$harmonics)
 dev.off()
 
 pdf(file.path(out_dir, "19_varimax_scores.pdf"), width = 8, height = 6)
-#plotscores(varmx, loc = 5)
+plot(varmx$scores[, 1], varmx$scores[, 2],
+     pch = 19, col = adjustcolor("steelblue", 0.6), cex = 1.2,
+     xlab = "Rot. PC1", ylab = "Rot. PC2",
+     main = "VARIMAX Rotated Scores")
+abline(h = 0, v = 0, lty = 3, col = "grey50")
 dev.off()
 
 
@@ -419,13 +433,13 @@ boxplot(fd_smooth)
 dev.off()
 
 pdf(file.path(out_dir, "21_fbplot_MBD.pdf"), width = 10, height = 6)
-fbplot(Y_eval, method = "MBD",
+fbplot(Y_eval, x = t_fine, method = "MBD",
        xlab = "Time (s)", ylab = "Amplitude (uV)",
        main = "Functional Boxplot (MBD)")
 dev.off()
 
 pdf(file.path(out_dir, "22_fbplot_BD2.pdf"), width = 10, height = 6)
-fbplot(Y_eval, method = "BD2",
+fbplot(Y_eval, x = t_fine, method = "BD2",
        xlab = "Time (s)", ylab = "Amplitude (uV)",
        main = "Functional Boxplot (BD2)")
 dev.off()
@@ -469,9 +483,6 @@ cat("Outliers (MBD):", fbplot_mbd$outliers, "\n")
 # (from 4_Boxplots_and_outliers2026.R lines 93-94)
 # ==============================================================================
 
-m <- muod(t(Y_eval), cut_method = "boxplot")
-names(m)
-str(m)
 m <- muod(t(Y_eval), cut_method = "boxplot")
 cat("\nMUOD outliers:\n")
 print(m$outliers)
@@ -566,9 +577,5 @@ cat("\n=== HUoutliers ===\n")
 print(foutliers(fds_obj, method = "HUoutliers"))
 sink()
 
-cat("\n*** All EDA outputs saved (PDFs 04-34 + text file 35). Done! ***\n")
-
-
-
-
+cat("\n*** All EDA outputs saved (PDFs 00-34 + text file 35). Done! ***\n")
 
