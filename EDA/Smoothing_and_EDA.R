@@ -1,10 +1,10 @@
 # ==============================================================================
 #
-#  Smoothing and Functional EDA
+#  Smoothing and Exploratory Data Analysis
 #  Flanker Task EEG — Channel FC1 — Stimulus S2
 #
 #  Input:  Flanker_stimulus_FC1_channel.csv (from assemble_subject_data.R)
-#  Output: 34 PDF plots + fd_smooth.rds + text results in outputs/
+#  Output: PDF plots + fd_smooth.rds + text results in outputs/
 #
 # ==============================================================================
 
@@ -406,18 +406,34 @@ varmx <- varmx.pca.fd(pcalist)
 cat("\nVARIMAX variance proportions:\n")
 print(varmx$varprop)
 
-pdf(file.path(out_dir, "17_varimax_plot.pdf"), width = 10, height = 8)
-plot(varmx)
+# Custom VARIMAX plot with correct "Rotated PC" labels
+pdf(file.path(out_dir, "17_varimax_plot.pdf"), width = 12, height = 8)
+opar <- par(mfrow = c(2, 2))
+for (k in 1:4) {
+  phi    <- varmx$harmonics[k]
+  lambda <- varmx$values[k]
+  f1 <- mn - c * sqrt(lambda) * phi
+  f2 <- mn + c * sqrt(lambda) * phi
+
+  plot(mn, ylim = range(eval.fd(t_fine, f1), eval.fd(t_fine, f2)),
+       lwd = 2, xlab = "Time (s)", ylab = "Amplitude (uV)",
+       main = paste0("Rotated PC", k, " (", round(varmx$varprop[k] * 100, 1), "%)"))
+  lines(f1, col = 2)
+  lines(f2, col = 3)
+  abline(v = 0, lty = 2, col = "grey50")
+}
+par(opar)
 dev.off()
 
 pdf(file.path(out_dir, "18_varimax_harmonics.pdf"), width = 10, height = 6)
-plot(varmx$harmonics)
+plot(varmx$harmonics, main = "VARIMAX Rotated Harmonics")
 dev.off()
 
 pdf(file.path(out_dir, "19_varimax_scores.pdf"), width = 8, height = 6)
 plot(varmx$scores[, 1], varmx$scores[, 2],
      pch = 19, col = adjustcolor("steelblue", 0.6), cex = 1.2,
-     xlab = "Rot. PC1", ylab = "Rot. PC2",
+     xlab = paste0("Rot. PC1 (", round(varmx$varprop[1] * 100, 1), "%)"),
+     ylab = paste0("Rot. PC2 (", round(varmx$varprop[2] * 100, 1), "%)"),
      main = "VARIMAX Rotated Scores")
 abline(h = 0, v = 0, lty = 3, col = "grey50")
 dev.off()
@@ -432,16 +448,26 @@ pdf(file.path(out_dir, "20_boxplot_fd.pdf"), width = 10, height = 6)
 boxplot(fd_smooth)
 dev.off()
 
+# fbplot: manually set x-axis to time values
+# Note: fbplot(Y_eval) uses column indices for x by default.
+# We suppress the default x-axis and draw our own with time labels.
+
+n_t <- nrow(Y_eval)
+tick_pos <- seq(1, n_t, length.out = 6)
+tick_lab <- round(seq(t_fine[1], t_fine[n_t], length.out = 6), 2)
+
 pdf(file.path(out_dir, "21_fbplot_MBD.pdf"), width = 10, height = 6)
-fbplot(Y_eval, x = t_fine, method = "MBD",
+fbplot(Y_eval, method = "MBD", xaxt = "n",
        xlab = "Time (s)", ylab = "Amplitude (uV)",
        main = "Functional Boxplot (MBD)")
+axis(1, at = tick_pos, labels = tick_lab)
 dev.off()
 
 pdf(file.path(out_dir, "22_fbplot_BD2.pdf"), width = 10, height = 6)
-fbplot(Y_eval, x = t_fine, method = "BD2",
+fbplot(Y_eval, method = "BD2", xaxt = "n",
        xlab = "Time (s)", ylab = "Amplitude (uV)",
        main = "Functional Boxplot (BD2)")
+axis(1, at = tick_pos, labels = tick_lab)
 dev.off()
 
 
@@ -462,20 +488,12 @@ print(mbd)
 
 pdf(file.path(out_dir, "23_band_depths.pdf"), width = 12, height = 6)
 opar <- par(mfrow = c(1, 2))
-plot(bd,  type = "l", main = "Band Depth",         xlab = "Subject", ylab = "BD")
-plot(mbd, type = "l", main = "Modified Band Depth", xlab = "Subject", ylab = "MBD")
+plot(bd,  type = "l", main = "Band Depth",
+     xlab = "Subject index", ylab = "BD")
+plot(mbd, type = "l", main = "Modified Band Depth",
+     xlab = "Subject index", ylab = "MBD")
 par(opar)
 dev.off()
-
-pdf(file.path(out_dir, "24_fdaoutlier_fbplot_bd.pdf"), width = 10, height = 6)
-fbplot_bd <- functional_boxplot(t(Y_eval), depth_method = "bd")
-dev.off()
-cat("\nOutliers (BD):", fbplot_bd$outliers, "\n")
-
-pdf(file.path(out_dir, "25_fdaoutlier_fbplot_mbd.pdf"), width = 10, height = 6)
-fbplot_mbd <- functional_boxplot(t(Y_eval), depth_method = "mbd")
-dev.off()
-cat("Outliers (MBD):", fbplot_mbd$outliers, "\n")
 
 
 # ==============================================================================
@@ -487,11 +505,14 @@ m <- muod(t(Y_eval), cut_method = "boxplot")
 cat("\nMUOD outliers:\n")
 print(m$outliers)
 
-pdf(file.path(out_dir, "26_muod.pdf"), width = 12, height = 4)
+pdf(file.path(out_dir, "24_muod.pdf"), width = 12, height = 4)
 opar <- par(mfrow = c(1, 3))
-plot(m$indices$shape,     type = "h", main = "Shape Index",     xlab = "Subject", ylab = "IS")
-plot(m$indices$magnitude, type = "h", main = "Magnitude Index", xlab = "Subject", ylab = "IM")
-plot(m$indices$amplitude, type = "h", main = "Amplitude Index", xlab = "Subject", ylab = "IA")
+plot(m$indices$shape,     type = "h", main = "Shape Index",
+     xlab = "Subject index", ylab = "IS")
+plot(m$indices$magnitude, type = "h", main = "Magnitude Index",
+     xlab = "Subject index", ylab = "IM")
+plot(m$indices$amplitude, type = "h", main = "Amplitude Index",
+     xlab = "Subject index", ylab = "IA")
 par(opar)
 dev.off()
 
@@ -504,11 +525,11 @@ dev.off()
 fds_obj <- fds(x = t_fine, y = Y_eval,
                xname = "Time (s)", yname = "Amplitude (uV)")
 
-pdf(file.path(out_dir, "27_rainbow_functions.pdf"), width = 10, height = 6)
+pdf(file.path(out_dir, "25_rainbow_functions.pdf"), width = 10, height = 6)
 plot(fds_obj, plot.type = "functions", plotlegend = TRUE)
 dev.off()
 
-pdf(file.path(out_dir, "28_rainbow_depth.pdf"), width = 10, height = 6)
+pdf(file.path(out_dir, "26_rainbow_depth.pdf"), width = 10, height = 6)
 plot(fds_obj, plot.type = "depth", plotlegend = TRUE)
 dev.off()
 
@@ -518,12 +539,12 @@ dev.off()
 # (from 5_Rainbow2026.R lines 138-142)
 # ==============================================================================
 
-pdf(file.path(out_dir, "29_bagplot_bivariate.pdf"), width = 8, height = 8)
+pdf(file.path(out_dir, "27_bagplot_bivariate.pdf"), width = 8, height = 8)
 fboxplot(fds_obj, plot.type = "bivariate",
          type = "bag", projmethod = "PCAproj")
 dev.off()
 
-pdf(file.path(out_dir, "30_bagplot_functional.pdf"), width = 10, height = 6)
+pdf(file.path(out_dir, "28_bagplot_functional.pdf"), width = 10, height = 6)
 fboxplot(fds_obj, plot.type = "functional",
          type = "bag", projmethod = "PCAproj")
 dev.off()
@@ -534,25 +555,25 @@ dev.off()
 # (from 5_Rainbow2026.R lines 63-87)
 # ==============================================================================
 
-pdf(file.path(out_dir, "31_hdr_bivariate_007.pdf"), width = 8, height = 8)
+pdf(file.path(out_dir, "29_hdr_bivariate_007.pdf"), width = 8, height = 8)
 fboxplot(fds_obj, plot.type = "bivariate",
          type = "hdr", alpha = c(0.07, 0.5),
          projmethod = "PCAproj")
 dev.off()
 
-pdf(file.path(out_dir, "32_hdr_bivariate_005.pdf"), width = 8, height = 8)
+pdf(file.path(out_dir, "30_hdr_bivariate_005.pdf"), width = 8, height = 8)
 fboxplot(fds_obj, plot.type = "bivariate",
          type = "hdr", alpha = c(0.05, 0.5),
          projmethod = "PCAproj")
 dev.off()
 
-pdf(file.path(out_dir, "33_hdr_functional_007.pdf"), width = 10, height = 6)
+pdf(file.path(out_dir, "31_hdr_functional_007.pdf"), width = 10, height = 6)
 fboxplot(fds_obj, plot.type = "functional",
          type = "hdr", alpha = c(0.07, 0.5),
          projmethod = "PCAproj")
 dev.off()
 
-pdf(file.path(out_dir, "34_hdr_functional_005.pdf"), width = 10, height = 6)
+pdf(file.path(out_dir, "32_hdr_functional_005.pdf"), width = 10, height = 6)
 fboxplot(fds_obj, plot.type = "functional",
          type = "hdr", alpha = c(0.05, 0.5),
          projmethod = "PCAproj")
@@ -564,7 +585,7 @@ dev.off()
 # (from 5_Rainbow2026.R lines 162-166)
 # ==============================================================================
 
-sink(file.path(out_dir, "35_foutliers_results.txt"))
+sink(file.path(out_dir, "33_foutliers_results.txt"))
 cat("=== robMah ===\n")
 print(foutliers(fds_obj, method = "robMah"))
 cat("\n=== lrt ===\n")
@@ -577,5 +598,5 @@ cat("\n=== HUoutliers ===\n")
 print(foutliers(fds_obj, method = "HUoutliers"))
 sink()
 
-cat("\n*** All EDA outputs saved (PDFs 00-34 + text file 35). Done! ***\n")
+cat("\n*** All EDA outputs saved. Done! ***\n")
 
