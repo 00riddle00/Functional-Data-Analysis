@@ -458,7 +458,7 @@ for (i in 1:nharm) {
   abline(h = 0, lty = 2, col = "grey30")
   abline(v = 0, col = "red", lty = 2)
   legend("topleft",
-         legend = c("Mean", "Mean + variation", "Mean - variation"),
+         legend = c("Mean", "+ variation", "− variation"),
          col = c("black", "steelblue3", "#FF8C00"),
          lty = c(1, 2, 3), lwd = c(1.5, 1.5, 1.5), cex = 0.8,
          bg = adjustcolor("white", alpha.f = 0.9))
