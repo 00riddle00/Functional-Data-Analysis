@@ -292,20 +292,21 @@ The presentation uses Beamer with XeLaTeX. If `latexmk` is unavailable, run
 
 ```bash
 make help          # show all available targets
+make all           # run the full pipeline from scratch
 make deps          # install Python and R dependencies
 make data          # acquire raw EEG data via datalad
 make stimuli       # raw EEG → per-stimulus CSVs (~40 min)
-make assemble      # CSVs → subject matrix CSV (~30 sec)
-make eda           # smoothing + full EDA (~2 min)
+make functional    # generate F7 .rds files (optional, ~40 min)
+make assemble      # CSVs → subject matrix CSV
+make eda           # smoothing + full EDA
 make presentation  # compile LaTeX slides
-make all           # run eda + presentation
 make clean         # remove generated outputs
-make clean-all     # also remove per-stimulus CSVs
+make distclean     # clean + remove all generated data folders
 ```
 
 Full pipeline from scratch:
 
 ```bash
-make deps data stimuli assemble eda presentation
+make all
 ```
 

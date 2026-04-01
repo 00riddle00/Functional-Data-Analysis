@@ -6,8 +6,9 @@
 #   make deps          Install Python and R dependencies
 #   make data          Acquire raw EEG data via datalad
 #   make stimuli       Raw EEG → per-stimulus CSVs (~40 min)
-#   make assemble      CSVs → subject matrix CSV (~30 sec)
-#   make eda           Smoothing + full EDA (~2 min)
+#   make functional    Generate F7 .rds files (optional, ~40 min)
+#   make assemble      CSVs → subject matrix CSV
+#   make eda           Smoothing + full EDA
 #   make presentation  Compile LaTeX slides
 #   make clean         Remove EDA outputs and presentation build files
 #   make distclean     clean + remove all generated data folders
@@ -42,7 +43,7 @@ PRESENTATION  := $(PRES_DIR)/main.pdf
 
 # --- Phony targets -----------------------------------------------------------
 
-.PHONY: all deps deps-python deps-r data stimuli assemble eda presentation \
+.PHONY: all deps deps-python deps-r data stimuli functional assemble eda presentation \
         clean distclean help
 
 # --- Default: full pipeline --------------------------------------------------
@@ -59,8 +60,9 @@ help:
 	@echo "  make deps          Install Python and R dependencies"
 	@echo "  make data          Acquire raw EEG data via datalad"
 	@echo "  make stimuli       Raw EEG -> per-stimulus CSVs (~40 min)"
-	@echo "  make assemble      CSVs -> subject matrix CSV (~30 sec)"
-	@echo "  make eda           Smoothing + full EDA (~2 min)"
+	@echo "  make functional    Generate F7 .rds files (optional, ~40 min)"
+	@echo "  make assemble      CSVs -> subject matrix CSV"
+	@echo "  make eda           Smoothing + full EDA"
 	@echo "  make presentation  Compile LaTeX slides"
 	@echo "  make clean         Remove EDA outputs and presentation build files"
 	@echo "  make distclean     clean + remove all generated data folders"
@@ -88,7 +90,7 @@ $(RAW_DATA_DIR)/.datalad:
 	cd $(RAW_DATA_DIR) && datalad get .
 	@echo "Raw EEG data acquired."
 
-# --- Step 3: Per-stimulus CSVs (Python) --------------------------------------
+# --- Step 3: Per-stimulus CSVs -----------------------------------------------
 
 stimuli: $(STIMULI_DIR)/.done
 
@@ -97,7 +99,17 @@ $(STIMULI_DIR)/.done: $(RAW_DATA_DIR)/.datalad
 	@touch $@
 	@echo "Per-stimulus CSVs generated."
 
-# --- Step 4: Assemble subject matrix (R) -------------------------------------
+# --- Step 3b (optional): F7 .rds files ---------------------------------------
+
+functional: $(FUNC_DIR)/.done
+
+$(FUNC_DIR)/.done: $(STIMULI_DIR)/.done
+	cd $(NOTEBOOKS) && $(RSCRIPT) -e "source('renv/activate.R'); IRkernel::installspec()" 2>/dev/null || true
+	cd $(NOTEBOOKS) && $(PYTHON) -m jupyter nbconvert --to notebook --execute 04_data_preparation_R.ipynb --output /dev/null
+	@touch $@
+	@echo "Functional .rds files generated."
+
+# --- Step 4: Assemble subject matrix -----------------------------------------
 
 assemble: $(SUBJECT_CSV)
 
@@ -105,7 +117,7 @@ $(SUBJECT_CSV): $(EDA_DIR)/assemble_subject_flanker_S2_FC1.R $(STIMULI_DIR)/.don
 	cd $(EDA_DIR) && $(RSCRIPT) assemble_subject_flanker_S2_FC1.R
 	@echo "Subject matrix assembled: $(SUBJECT_CSV)"
 
-# --- Step 5: Smoothing + EDA (R) ---------------------------------------------
+# --- Step 5: Smoothing + EDA -------------------------------------------------
 
 eda: $(FD_SMOOTH)
 
