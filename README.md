@@ -310,3 +310,11 @@ Full pipeline from scratch:
 make all
 ```
 
+## Hypothesis Testing
+
+### H1: The shape and amplitude of the functional EEG curves over time are significantly associated with continuous ADHD symptom severity scores.
+
+### H2: Self-reported socioeconomic status significantly predicts the temporal dynamics and amplitude of the mean functional ERP curves.
+
+### H3: There is a significant difference in the mean functional trajectories of the EEG time-series curves between genders across the trial time window.
+
