@@ -1,3 +1,4 @@
+# vim: set ft=r tw=88 nu ai et ts=2 sw=2:
 ################################################################################
 # Hypothesis Testing
 # H0: mu_ADHD(t) = mu_nonADHD(t)
@@ -13,20 +14,30 @@
 #   4. Permutation test (tperm.fd from fda package)
 ################################################################################
 
-rm(list = ls())
+# Create output directory if it doesn't exist
+out_dir <- file.path("./HT/outputs")
+dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+
+# Clean previous outputs to avoid corrupt PDFs from incomplete overwrites
+old_files <- list.files(out_dir, pattern = "\\.(pdf|rds|txt)$", full.names = TRUE)
+if (length(old_files) > 0) {
+  file.remove(old_files)
+  cat("Cleaned", length(old_files), "old output files.\n")
+}
+
 library(fda)
 
 # Source lecturer's test functions
-source("trace.R")
-source("Ztwosample.R")
-source("L2stattwosample.R")
-source("Fstattwosample.R")
+source("./HT/trace.R")
+source("./HT/Ztwosample.R")
+source("./HT/L2stattwosample.R")
+source("./HT/Fstattwosample.R")
 
 # ==============================================================================
 # Load smoothed data and split by ADHD status
 # ==============================================================================
 
-fd_smooth <- readRDS("fd_smooth.rds")
+fd_smooth <- readRDS("./EDA/outputs/fd_smooth.rds")
 
 # Subject names in the fd object
 sub_names <- colnames(fd_smooth$coefs)
@@ -64,7 +75,7 @@ t_fine <- seq(fd_smooth$basis$rangeval[1],
 # Plot: ADHD vs non-ADHD mean curves
 # ==============================================================================
 
-pdf("HT_01_group_comparison.pdf", width = 12, height = 6)
+pdf(file.path(out_dir, "HT_01_group_comparison.pdf"), width = 12, height = 6)
 opar <- par(mfrow = c(1, 2))
 
 plot(fd_adhd, col = adjustcolor("red", 0.4), lty = 1,
@@ -83,7 +94,8 @@ par(opar)
 dev.off()
 
 # Mean curves together
-pdf("HT_02_mean_comparison.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "HT_02_mean_comparison.pdf"), width = 10, height = 6)
+
 plot(mean.fd(fd_nonadhd), lwd = 3, col = "blue",
      xlab = "Time (s)", ylab = "Amplitude (uV)",
      main = "Mean EEG Curves: ADHD vs Non-ADHD",
@@ -104,8 +116,9 @@ dev.off()
 # (from Ztwosample.R)
 # ==============================================================================
 
-pdf("HT_03_pointwise_Ztest.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "HT_03_pointwise_Ztest.pdf"), width = 10, height = 6)
 stat_z <- Ztwosample(x = fd_adhd, y = fd_nonadhd, t.seq = t_fine)
+title(main = "Pointwise Z-test", xlab = "Time (s)")
 dev.off()
 
 cat("\n=== Pointwise Z-test ===\n")
@@ -172,8 +185,9 @@ cat("p-value:", stat_f_boot$pvalue, "\n")
 # ==============================================================================
 
 cat("\n=== Permutation test (tperm.fd) ===\n")
-pdf("HT_04_permutation_test.pdf", width = 10, height = 6)
+pdf(file.path(out_dir, "HT_04_permutation_test.pdf"), width = 10, height = 6)
 stat_perm <- tperm.fd(fd_adhd, fd_nonadhd)
+title(xlab = "Time (s)")
 dev.off()
 cat("p-value:", stat_perm$pval, "\n")
 
