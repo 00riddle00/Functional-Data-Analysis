@@ -1,7 +1,6 @@
 # -----------------------------------------------
-# Python language
+# Python
 # -----------------------------------------------
-
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -191,7 +190,8 @@ cython_debug/
 #  that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
 #  and can be added to the global gitignore or merged into this file. However, if you prefer,
 #  you could uncomment the following to ignore the entire vscode folder
-.vscode/
+.vscode/*
+!.vscode/settings.json
 
 # Ruff stuff:
 .ruff_cache/
@@ -212,7 +212,7 @@ marimo/_lsp/
 __marimo__/
 
 # -----------------------------------------------
-# R language
+# R
 # -----------------------------------------------
 
 # History files
@@ -266,24 +266,88 @@ po/*~
 rsconnect/
 
 # -----------------------------------------------
-# macOS
+# LaTeX
 # -----------------------------------------------
 
-# metadata files
+# Auxiliary files
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.idx
+*.ilg
+*.ind
+*.lof
+*.lot
+*.out
+*.toc
+*.acn
+*.acr
+*.alg
+*.glg
+*.glo
+*.gls
+*.ist
+*.fls
+*.log
+*.fdb_latexmk
+*.synctex.gz
+*.synctex.gz(busy)
+*.xdv
+
+# Bibliography
+*.run.xml
+
+# Minted (code highlighting)
+_minted*
+*.pyg
+
+# TikZ / externalization
+*.dpth
+*.md5
+*.auxlock
+
+# Beamer / presentations
+*.nav
+*.snm
+
+# Overleaf artifacts
+*.latexmain
+
+# -----------------------------------------------
+# Editors / OS
+# -----------------------------------------------
+
+# Swap and backup files
+*~
+*.swp
+*.swo
+
+# macOS metadata files
 .DS_Store
 
-# -----------------------------------------------
-# Windows
-# -----------------------------------------------
-
-# metadata files
+# Windows metadata files
 Thumbs.db
 Desktop.ini
+
+# -----------------------------------------------
+# Miscellaneous
+# -----------------------------------------------
+
+# Temporary files
+*.tmp
+*.temp
+
+# Makefile empty target files, containing a timestamp
+*.stamp
 
 # -----------------------------------------------
 # Datasets
 # -----------------------------------------------
 
+# Standalone clone of raw EEG data (not a submodule)
 ds006018/
+
+# Generated from ds006018/
 ds006018_per_stimuli/
 ds006018_functional/
