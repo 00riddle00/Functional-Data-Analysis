@@ -1,3 +1,5 @@
+# vim: set ft=r tw=88 nu ai et ts=2 sw=2:
+
 #https://cran.r-project.org/web/packages/DepthProc/DepthProc.pdf
 #http://www.csun.edu/~ctoth/Handbook/chap58.pdf
 library(DepthProc)

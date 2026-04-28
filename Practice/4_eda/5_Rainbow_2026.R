@@ -1,3 +1,5 @@
+# vim: set ft=r tw=88 nu ai et ts=2 sw=2:
+
 ###################################
 # load the package
 library("rainbow")

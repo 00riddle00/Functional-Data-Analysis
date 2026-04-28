@@ -1,3 +1,4 @@
+# vim: set ft=r tw=88 nu ai et ts=2 sw=2:
 # ==============================================================================
 #  Create the across-subjects data matrix from per-stimuli CSVs
 #
