@@ -21,30 +21,34 @@ else
 	VENV_BIN := $(CURDIR)/.venv/bin
 endif
 
-NOTEBOOKS  := Notebooks
-EDA_DIR    := EDA
-PRES_DIR   := Presentations
-OUT_DIR    := $(EDA_DIR)/outputs
+NOTEBOOKS   := Notebooks
+EDA_DIR     := EDA
+HT_DIR      := HT
+PRES_DIR    := Presentations
+EDA_OUT_DIR := $(EDA_DIR)/outputs
+HT_OUT_DIR  := $(HT_DIR)/outputs
 
 RAW_DATA_URL := https://github.com/OpenNeuroDatasets/ds006018.git
 
 # Input/output files
-SUBJECT_CSV   := $(EDA_DIR)/Flanker_stimulus_FC1_channel.csv
-SUBJECT_META  := $(EDA_DIR)/subject_metadata.csv
-FD_SMOOTH     := $(OUT_DIR)/fd_smooth.rds
-STIMULI_DIR   := ds006018_per_stimuli
-FUNC_DIR      := ds006018_functional
-RAW_DATA_DIR  := ds006018
-PRESENTATION  := $(PRES_DIR)/presentation_1st.pdf
+SUBJECT_CSV    := $(EDA_DIR)/Flanker_stimulus_FC1_channel.csv
+SUBJECT_META   := $(EDA_DIR)/subject_metadata.csv
+FD_SMOOTH      := $(EDA_OUT_DIR)/fd_smooth.rds
+HT_PLOTS       := $(HT_OUT_DIR)/HT_01_group_comparison.pdf
+STIMULI_DIR    := ds006018_per_stimuli
+FUNC_DIR       := ds006018_functional
+RAW_DATA_DIR   := ds006018
+PRESENTATION_1 := $(PRES_DIR)/presentation_1st.pdf
+PRESENTATION_2 := $(PRES_DIR)/presentation_2nd.pdf
 
 # --- Phony targets -----------------------------------------------------------
 
-.PHONY: all deps deps-python deps-r data stimuli functional assemble eda presentation clean \
-	distclean help
+.PHONY: all deps deps-python deps-r data stimuli functional assemble eda hypothesis_testing \
+	presentation_1 presentation_2 clean distclean help
 
 # --- Default: full pipeline --------------------------------------------------
 
-all: deps data stimuli assemble eda presentation
+all: deps data stimuli assemble eda presentation_1 presentation_2
 	@echo ""
 	@echo "=== Full pipeline complete. ==="
 
@@ -52,18 +56,19 @@ all: deps data stimuli assemble eda presentation
 
 help:
 	@echo ""
-	@echo "  make all           Run the full pipeline from scratch"
-	@echo "  make deps          Install Python and R dependencies"
-	@echo "  make data          Acquire raw EEG data via datalad"
-	@echo "  make stimuli       Raw EEG -> per-stimulus CSVs (~40 min)"
-	@echo "  make functional    Generate F7 .rds files (optional, ~40 min)"
-	@echo "  make assemble      CSVs -> subject matrix CSV"
-	@echo "  make eda           Smoothing + full EDA"
-	@echo "  make presentation  Compile LaTeX slides"
-	@echo "  make clean         Remove EDA outputs and presentation build files"
-	@echo "  make distclean     clean + remove all generated data folders (caution)"
-	@echo "  make clean-env     Remove Python venv and R library (for testing)"
-	@echo "  make help          show this message"
+	@echo "  make all             Run the full pipeline from scratch"
+	@echo "  make deps            Install Python and R dependencies"
+	@echo "  make data            Acquire raw EEG data via datalad"
+	@echo "  make stimuli         Raw EEG -> per-stimulus CSVs (~40 min)"
+	@echo "  make functional      Generate F7 .rds files (optional, ~40 min)"
+	@echo "  make assemble        CSVs -> subject matrix CSV"
+	@echo "  make eda             Smoothing + full EDA"
+	@echo "  make presentation_1  Compile LaTeX slides for 1st presentation"
+	@echo "  make presentation_2  Compile LaTeX slides for 2nd presentation"
+	@echo "  make clean           Remove EDA outputs and presentation build files"
+	@echo "  make distclean       clean + remove all generated data folders (caution)"
+	@echo "  make clean-env       Remove Python venv and R library (for testing)"
+	@echo "  make help            show this message"
 	@echo ""
 
 # --- Step 1: Dependencies ----------------------------------------------------
@@ -114,7 +119,13 @@ $(RAW_DATA_DIR)/.stamp:
 	@echo "Raw EEG data acquired."
 
 # --- Step 3: Per-stimulus CSVs -----------------------------------------------
-
+#
+# NOTE: The notebook file (03_data_preparation.ipynb) is intentionally NOT
+# listed as a dependency. Editing the notebook will not trigger a re-run.
+# This avoids accidental 40+ minute re-runs from minor notebook edits
+# (e.g., adding comments or formatting). To force a re-run after a
+# meaningful notebook change, delete the stamp file:
+#   rm ds006018_per_stimuli/.stamp && make stimuli
 stimuli: $(STIMULI_DIR)/.stamp
 
 $(STIMULI_DIR)/.stamp: $(RAW_DATA_DIR)/.stamp
@@ -138,7 +149,9 @@ $(STIMULI_DIR)/.stamp: $(RAW_DATA_DIR)/.stamp
 	#@echo "Per-stimulus CSVs generated."
 
 # --- Step 3b (optional): F7 .rds files ---------------------------------------
-
+#
+# NOTE: Same as above - notebook edits do not trigger re-runs.
+# To force: rm ds006018_functional/.stamp && make functional
 functional: $(FUNC_DIR)/.stamp
 
 # TODO: consider replacing notebook execution with .py/.R scripts for pipeline
@@ -164,16 +177,31 @@ eda: $(FD_SMOOTH)
 
 $(FD_SMOOTH): $(EDA_DIR)/Smoothing_and_EDA.R $(SUBJECT_CSV)
 	$(RSCRIPT) $(EDA_DIR)/Smoothing_and_EDA.R
-	@echo "EDA complete. Outputs in $(OUT_DIR)/"
+	@echo "EDA complete. Outputs in $(EDA_OUT_DIR)/"
 
-# --- Step 6: LaTeX presentation ----------------------------------------------
+# --- Step 6: Hypothesis testing ----------------------------------------------
 
-presentation: $(PRESENTATION)
+hypothesis_testing: $(HT_PLOTS)
 
-$(PRESENTATION): $(PRES_DIR)/presentation_1st.tex $(FD_SMOOTH)
-	cp $(OUT_DIR)/*.pdf $(PRES_DIR)/ 2>/dev/null || true
+$(HT_PLOTS): $(HT_DIR)/Hypothesis_testing_ADHD.R $(FD_SMOOTH)
+	$(RSCRIPT) $(HT_DIR)/Hypothesis_testing_ADHD.R
+	@echo "Hypothesis testing complete. Outputs in $(HT_OUT_DIR)/"
+
+# --- Step 7: LaTeX presentations ---------------------------------------------
+
+presentation_1: $(PRESENTATION_1)
+
+$(PRESENTATION_1): $(PRES_DIR)/presentation_1st.tex $(FD_SMOOTH)
+	cp $(EDA_OUT_DIR)/*.pdf $(PRES_DIR)/ 2>/dev/null || true
 	$(LATEXMK) -xelatex -interaction=nonstopmode -outdir=$(PRES_DIR) $(PRES_DIR)/presentation_1st.tex
-	@echo "Presentation compiled: $(PRESENTATION)"
+	@echo "Presentation compiled: $(PRESENTATION_1)"
+
+presentation_2: $(PRESENTATION_2)
+
+$(PRESENTATION_2): $(PRES_DIR)/presentation_2nd.tex $(HT_PLOTS)
+	cp $(HT_OUT_DIR)/*.pdf $(PRES_DIR)/ 2>/dev/null || true
+	$(LATEXMK) -xelatex -interaction=nonstopmode -outdir=$(PRES_DIR) $(PRES_DIR)/presentation_2nd.tex
+	@echo "Presentation compiled: $(PRESENTATION_2)"
 
 # --- Clean -------------------------------------------------------------------
 
@@ -186,10 +214,11 @@ $(PRESENTATION): $(PRES_DIR)/presentation_1st.tex $(FD_SMOOTH)
 #   - using a tool like DVC for data/artifact versioning.
 # Current workflow: run `git restore EDA/` after `make clean` if needed.
 clean:
-	rm -f $(OUT_DIR)/*.pdf $(OUT_DIR)/*.rds $(OUT_DIR)/*.txt
+	rm -f $(EDA_OUT_DIR)/*.pdf $(EDA_OUT_DIR)/*.rds $(EDA_OUT_DIR)/*.txt
+	rm -f $(HT_OUT_DIR)/*.pdf $(HT_OUT_DIR)/*.rds $(HT_OUT_DIR)/*.txt
 	rm -f $(SUBJECT_CSV) $(SUBJECT_META)
 	git clean -fdX -- $(PRES_DIR)
-	@echo "Cleaned EDA outputs and presentation build files."
+	@echo "Cleaned EDA, HT outputs and presentation build files."
 
 # Caution: will remove all generated data folders, which are not tracked by Git.
 distclean: clean
