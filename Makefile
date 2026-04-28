@@ -1,36 +1,32 @@
-# ==============================================================================
+# vim: set ft=make tw=100 nu noet ts=8 sw=8:
+# =============================================================================
 # Functional Data Analysis — EEG Project Makefile
-#
-# Usage:
-#   make all           Run the full pipeline from scratch
-#   make deps          Install Python and R dependencies
-#   make data          Acquire raw EEG data via datalad
-#   make stimuli       Raw EEG → per-stimulus CSVs (~40 min)
-#   make functional    Generate F7 .rds files (optional, ~40 min)
-#   make assemble      CSVs → subject matrix CSV
-#   make eda           Smoothing + full EDA
-#   make presentation  Compile LaTeX slides
-#   make clean         Remove EDA outputs and presentation build files
-#   make distclean     clean + remove all generated data folders
-#   make help          Show all available targets
 #
 # Prerequisites:
 #   Linux/macOS: make is pre-installed
 #   Windows:     install via Rtools4 or: choco install make
 #                run from Git Bash or Rtools terminal, not PowerShell
-#
-# ==============================================================================
+# =============================================================================
 
 # --- Configuration -----------------------------------------------------------
 
 PYTHON     := python3
 RSCRIPT    := Rscript
 LATEXMK    := latexmk
+STAMP_DATE := date "+%F %T %Z"
+
+ifeq ($(OS),Windows_NT)
+	VENV_BIN := $(CURDIR)/.venv/Scripts
+else
+	VENV_BIN := $(CURDIR)/.venv/bin
+endif
 
 NOTEBOOKS  := Notebooks
 EDA_DIR    := EDA
 PRES_DIR   := Presentations
 OUT_DIR    := $(EDA_DIR)/outputs
+
+RAW_DATA_URL := https://github.com/OpenNeuroDatasets/ds006018.git
 
 # Input/output files
 SUBJECT_CSV   := $(EDA_DIR)/Flanker_stimulus_FC1_channel.csv
@@ -39,12 +35,12 @@ FD_SMOOTH     := $(OUT_DIR)/fd_smooth.rds
 STIMULI_DIR   := ds006018_per_stimuli
 FUNC_DIR      := ds006018_functional
 RAW_DATA_DIR  := ds006018
-PRESENTATION  := $(PRES_DIR)/main.pdf
+PRESENTATION  := $(PRES_DIR)/presentation_1st.pdf
 
 # --- Phony targets -----------------------------------------------------------
 
-.PHONY: all deps deps-python deps-r data stimuli functional assemble eda presentation \
-        clean distclean help
+.PHONY: all deps deps-python deps-r data stimuli functional assemble eda presentation clean \
+	distclean help
 
 # --- Default: full pipeline --------------------------------------------------
 
@@ -65,56 +61,101 @@ help:
 	@echo "  make eda           Smoothing + full EDA"
 	@echo "  make presentation  Compile LaTeX slides"
 	@echo "  make clean         Remove EDA outputs and presentation build files"
-	@echo "  make distclean     clean + remove all generated data folders"
+	@echo "  make distclean     clean + remove all generated data folders (caution)"
+	@echo "  make clean-env     Remove Python venv and R library (for testing)"
+	@echo "  make help          show this message"
 	@echo ""
 
 # --- Step 1: Dependencies ----------------------------------------------------
 
 deps: deps-python deps-r
 
-deps-python:
+deps-python: .venv/.stamp
+
+deps-r: renv/.stamp
+
+.venv/.stamp: requirements.txt
 	$(PYTHON) -m venv .venv
-	.venv/bin/pip install -r requirements.txt || .venv/Scripts/pip install -r requirements.txt
+	$(VENV_BIN)/pip install --upgrade pip
+	$(VENV_BIN)/pip install -r requirements.txt
+	$(STAMP_DATE) > $@
 	@echo "Python dependencies installed."
 
-deps-r:
-	$(RSCRIPT) -e "if (!requireNamespace('renv', quietly=TRUE)) install.packages('renv'); renv::restore()"
-	@echo "R dependencies installed."
+renv/.stamp: renv.lock
+	@mkdir -p renv
+	$(RSCRIPT) -e "\
+	  if (!requireNamespace('renv', quietly=TRUE)) install.packages('renv'); \
+	  renv::restore(prompt = FALSE); \
+	  if (!requireNamespace('IRkernel', quietly=TRUE)) install.packages('IRkernel'); \
+	  IRkernel::installspec( \
+	    name = paste0('r-', basename(getwd())), \
+	    displayname = paste0('R (', basename(getwd()), ')') \
+	  ); \
+	"
+	$(STAMP_DATE) > $@
+	@echo "R dependencies installed and IRkernel registered."
 
 # --- Step 2: Raw data --------------------------------------------------------
+#
+# .stamp is a stamp/sentinel file (= empty target) created after datalad
+# downloads the full dataset (~10 GB). Without it, make cannot distinguish
+# between "repo cloned but data not fetched" and "data fully fetched," since
+# .datalad/ exists in both cases. It also contains a timestamp of the last
+# successful data acquisition, which can be useful for debugging and tracking
+# when the data was last updated.
+data: $(RAW_DATA_DIR)/.stamp
 
-data: $(RAW_DATA_DIR)/.datalad
-
-$(RAW_DATA_DIR)/.datalad:
-	git submodule update --init
-	cd $(RAW_DATA_DIR) && datalad get .
+$(RAW_DATA_DIR)/.stamp:
+	@if [ ! -d "$(RAW_DATA_DIR)" ]; then \
+		git clone $(RAW_DATA_URL) $(RAW_DATA_DIR); \
+	fi
+	$(VENV_BIN)/datalad get -d $(RAW_DATA_DIR) $(RAW_DATA_DIR)
+	$(STAMP_DATE) > $@
 	@echo "Raw EEG data acquired."
 
 # --- Step 3: Per-stimulus CSVs -----------------------------------------------
 
-stimuli: $(STIMULI_DIR)/.done
+stimuli: $(STIMULI_DIR)/.stamp
 
-$(STIMULI_DIR)/.done: $(RAW_DATA_DIR)/.datalad
-	cd $(NOTEBOOKS) && $(PYTHON) -m jupyter nbconvert --to notebook --execute 03_data_preparation.ipynb --output /dev/null
-	@touch $@
+$(STIMULI_DIR)/.stamp: $(RAW_DATA_DIR)/.stamp
+	cd $(NOTEBOOKS) && $(VENV_BIN)/jupyter nbconvert \
+		--to notebook \
+		--execute \
+		--inplace \
+		03_data_preparation.ipynb
+	$(STAMP_DATE) > $@
 	@echo "Per-stimulus CSVs generated."
+
+# TODO: consider replacing notebook execution with .py/.R scripts for pipeline
+#$(STIMULI_DIR)/.stamp: $(RAW_DATA_DIR)/.stamp
+	#$(VENV_BIN)/jupyter nbconvert \
+		#--to notebook \
+		#--execute \
+		#--inplace \
+		#$(NOTEBOOKS)/03_data_preparation.ipynb
+	#@mkdir -p $(dir $@)
+	#$(STAMP_DATE) > $@
+	#@echo "Per-stimulus CSVs generated."
 
 # --- Step 3b (optional): F7 .rds files ---------------------------------------
 
-functional: $(FUNC_DIR)/.done
+functional: $(FUNC_DIR)/.stamp
 
-$(FUNC_DIR)/.done: $(STIMULI_DIR)/.done
-	cd $(NOTEBOOKS) && $(RSCRIPT) -e "source('renv/activate.R'); IRkernel::installspec()" 2>/dev/null || true
-	cd $(NOTEBOOKS) && $(PYTHON) -m jupyter nbconvert --to notebook --execute 04_data_preparation_R.ipynb --output /dev/null
-	@touch $@
+# TODO: consider replacing notebook execution with .py/.R scripts for pipeline
+$(FUNC_DIR)/.stamp: $(STIMULI_DIR)/.stamp
+	$(VENV_BIN)/jupyter nbconvert \
+		--to notebook \
+		--execute $(NOTEBOOKS)/04_data_preparation_R.ipynb \
+		--output /dev/null
+	$(STAMP_DATE) > $@
 	@echo "Functional .rds files generated."
 
 # --- Step 4: Assemble subject matrix -----------------------------------------
 
 assemble: $(SUBJECT_CSV)
 
-$(SUBJECT_CSV): $(EDA_DIR)/assemble_subject_flanker_S2_FC1.R $(STIMULI_DIR)/.done
-	cd $(EDA_DIR) && $(RSCRIPT) assemble_subject_flanker_S2_FC1.R
+$(SUBJECT_CSV): $(EDA_DIR)/assemble_subject_flanker_S2_FC1.R $(STIMULI_DIR)/.stamp
+	$(RSCRIPT) $(EDA_DIR)/assemble_subject_flanker_S2_FC1.R
 	@echo "Subject matrix assembled: $(SUBJECT_CSV)"
 
 # --- Step 5: Smoothing + EDA -------------------------------------------------
@@ -122,30 +163,44 @@ $(SUBJECT_CSV): $(EDA_DIR)/assemble_subject_flanker_S2_FC1.R $(STIMULI_DIR)/.don
 eda: $(FD_SMOOTH)
 
 $(FD_SMOOTH): $(EDA_DIR)/Smoothing_and_EDA.R $(SUBJECT_CSV)
-	cd $(EDA_DIR) && $(RSCRIPT) Smoothing_and_EDA.R
+	$(RSCRIPT) $(EDA_DIR)/Smoothing_and_EDA.R
 	@echo "EDA complete. Outputs in $(OUT_DIR)/"
 
 # --- Step 6: LaTeX presentation ----------------------------------------------
 
 presentation: $(PRESENTATION)
 
-$(PRESENTATION): $(PRES_DIR)/main.tex $(FD_SMOOTH)
+$(PRESENTATION): $(PRES_DIR)/presentation_1st.tex $(FD_SMOOTH)
 	cp $(OUT_DIR)/*.pdf $(PRES_DIR)/ 2>/dev/null || true
-	cd $(PRES_DIR) && $(LATEXMK) -xelatex -interaction=nonstopmode main.tex
+	$(LATEXMK) -xelatex -interaction=nonstopmode -outdir=$(PRES_DIR) $(PRES_DIR)/presentation_1st.tex
 	@echo "Presentation compiled: $(PRESENTATION)"
 
 # --- Clean -------------------------------------------------------------------
 
+# TODO:
+# `make clean` currently removes files that are tracked by Git (EDA outputs, CSVs, etc.).
+# This is intentional for now, but results in `git status` showing deletions.
+# In the future, consider:
+#   - moving generated artifacts to .gitignore, OR
+#   - keeping only a curated subset of outputs in Git, OR
+#   - using a tool like DVC for data/artifact versioning.
+# Current workflow: run `git restore EDA/` after `make clean` if needed.
 clean:
 	rm -f $(OUT_DIR)/*.pdf $(OUT_DIR)/*.rds $(OUT_DIR)/*.txt
 	rm -f $(SUBJECT_CSV) $(SUBJECT_META)
-	rm -f $(PRES_DIR)/*.aux $(PRES_DIR)/*.log $(PRES_DIR)/*.nav
-	rm -f $(PRES_DIR)/*.out $(PRES_DIR)/*.snm $(PRES_DIR)/*.toc
-	rm -f $(PRES_DIR)/*.fls $(PRES_DIR)/*.fdb_latexmk $(PRES_DIR)/*.xdv
-	rm -f $(PRES_DIR)/main.pdf
+	git clean -fdX -- $(PRES_DIR)
 	@echo "Cleaned EDA outputs and presentation build files."
 
+# Caution: will remove all generated data folders, which are not tracked by Git.
 distclean: clean
 	rm -rf $(STIMULI_DIR)
 	rm -rf $(FUNC_DIR)
-	@echo "Also removed per-stimulus CSVs and functional .rds files."
+	rm -f $(RAW_DATA_DIR)/.stamp
+	@echo "Also removed generated data folders and sentinel files."
+
+# Completely remove Python venv and R library (for testing purposes).
+clean-env:
+	rm -rf .venv
+	rm -rf renv/library
+	rm -f renv/.stamp
+	@echo "Removed Python venv, R library, and dependency stamps."
