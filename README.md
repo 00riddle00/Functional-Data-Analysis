@@ -72,7 +72,7 @@ Needed to acquire the raw 10 GB EEG data.
 
 ### LaTeX
 
-Needed to compile the presentation locally.
+Needed to compile the presentations locally.
 
 - **Linux:** `$ sudo apt install texlive-full` (or minimal:
   `$ sudo apt install texlive-base texlive-latex-recommended texlive-latex-extra
@@ -153,8 +153,8 @@ Run in R console:
 
 ## Pipeline
 
-The pipeline has 4 steps. Each depends on the output of the previous one. Run `$ make
-all` to execute steps 3–4 and compile the presentation, or run each step individually.
+The pipeline has 6 steps. Each depends on the output of the previous one. Run `$ make
+all` to execute the full pipeline, or run each step individually.
 
 ### Step 1: Acquire raw EEG data (10+ GB, takes a while)
 
@@ -182,7 +182,7 @@ task per stimulus.
 ### Step 2b (optional): Generate smoothed .rds files (~40 min)
 
 Only needed if you want F7-channel functional data objects. The main analysis (Steps
-3–4) does not use these — it extracts FC1 directly from the CSVs.
+3–6) does not use these — it extracts FC1 directly from the CSVs.
 
 ```bash
 (.venv) $ jupyter nbconvert \
@@ -221,21 +221,34 @@ mean/SD, covariance, FPCA, depth, outlier detection, boxplots, rainbow plots.
 - **Input:** `EDA/Flanker_stimulus_FC1_channel.csv`
 - **Output:** 30+ PDF plots + 1 text file + `fd_smooth.rds` in `EDA/outputs/`
 
-### Step 5 (optional): Compile presentation
+### Step 5: Hypothesis testing
+
+```bash
+$ Rscript HT/Hypothesis_testing_ADHD.R
+```
+
+Tests whether functional EEG curves differ significantly between groups (ADHD vs
+non-ADHD) using pointwise Z-test, L2-norm test, F-type test, and permutation test.
+
+- **Input:** `EDA/outputs/fd_smooth.rds`
+- **Output:** 4 PDF plots in `HT/outputs/`
+
+### Step 6 (optional): Compile presentations
 
 ```bash
 $ latexmk -xelatex -interaction=nonstopmode -outdir=Presentations Presentations/presentation_1st.tex
+$ latexmk -xelatex -interaction=nonstopmode -outdir=Presentations Presentations/presentation_2nd.tex
 ```
 
-The presentation uses Beamer with XeLaTeX. If `latexmk` is unavailable, run `$ xelatex
-presentation_1st.tex` twice manually.
+The presentations use Beamer with XeLaTeX. If `latexmk` is unavailable, run
+`$ xelatex <file>.tex` twice manually.
 
 ### LaTeX troubleshooting
 
 - **xeCJK error:** If you don't need CJK (Chinese/Japanese/Korean) support, remove
-  `\usepackage{xeCJK}` from `presentation_1st.tex`.
+  `\usepackage{xeCJK}` from the relevant `.tex` file.
 - **Font error on Linux:** Install Utopia font: `$ sudo apt install
-  texlive-fonts-extra`, or remove `\usepackage{utopia}` from `presentation_1st.tex`.
+  texlive-fonts-extra`, or remove `\usepackage{utopia}` from the `.tex` file.
 - **Missing packages on Windows (MiKTeX):** MiKTeX installs missing packages
   automatically on first compile. If prompted, click "Install".
 - **Missing packages on Linux (TeX Live):** `$ tlmgr install <package-name>`
@@ -255,6 +268,13 @@ presentation_1st.tex` twice manually.
 │   ├── Flanker_stimulus_FC1_channel.csv  # 62 subjects × 501 time points
 │   ├── subject_metadata.csv       # epoch counts per subject
 │   └── outputs/                   # All PDFs, fd_smooth.rds, text results
+├── HT/
+│   ├── Hypothesis_testing_ADHD.R  # Step 5: functional hypothesis tests
+│   ├── trace.R                    # lecturer's helper functions
+│   ├── Ztwosample.R
+│   ├── L2stattwosample.R
+│   ├── Fstattwosample.R
+│   └── outputs/                   # 4 PDF plots
 ├── Notebooks/
 │   ├── 01_initial_data_exploration.ipynb  # demographics, participants.tsv
 │   ├── 02_data_analysis.ipynb             # early MNE exploration
@@ -262,7 +282,8 @@ presentation_1st.tex` twice manually.
 │   ├── 04_data_preparation_R.ipynb        # F7 smoothing → .rds files
 │   ├── 05_read_data_R.ipynb               # .rds structure inspection
 │   └── 06_plot_data_R.ipynb               # visual checks of .rds files
-├── Presentations/                 # Beamer slides (presentation_1st.tex, compiled PDFs)
+├── Presentations/                 # Beamer slides (presentation_1st.tex,
+│                                  #   presentation_2nd.tex, compiled PDFs)
 ├── Slides/                        # University lecture slides (reference only)
 ├── Practice/                      # University lab materials and our experiments
 ├── Makefile                       # run `make help` for targets
@@ -294,17 +315,19 @@ presentation_1st.tex` twice manually.
 ## Make targets
 
 ```bash
-$ make help          # show all available targets
-$ make all           # run the full pipeline from scratch
-$ make deps          # install Python and R dependencies
-$ make data          # acquire raw EEG data via datalad
-$ make stimuli       # raw EEG → per-stimulus CSVs (~40 min)
-$ make functional    # generate F7 .rds files (optional, ~40 min)
-$ make assemble      # CSVs → subject matrix CSV
-$ make eda           # smoothing + full EDA
-$ make presentation  # compile LaTeX slides
-$ make clean         # remove generated outputs
-$ make distclean     # clean + remove all generated data folders
+$ make help              # show all available targets
+$ make all               # run the full pipeline from scratch
+$ make deps              # install Python and R dependencies
+$ make data              # acquire raw EEG data via datalad
+$ make stimuli           # raw EEG → per-stimulus CSVs (~40 min)
+$ make functional        # generate F7 .rds files (optional, ~40 min)
+$ make assemble          # CSVs → subject matrix CSV
+$ make eda               # smoothing + full EDA
+$ make hypothesis_testing  # functional hypothesis tests + plots
+$ make presentation_1    # compile LaTeX slides for 1st presentation
+$ make presentation_2    # compile LaTeX slides for 2nd presentation
+$ make clean             # remove generated outputs
+$ make distclean         # clean + remove all generated data folders
 ```
 
 Full pipeline from scratch:
@@ -320,4 +343,3 @@ $ make all
 ### H2: Self-reported socioeconomic status significantly predicts the temporal dynamics and amplitude of the mean functional ERP curves.
 
 ### H3: There is a significant difference in the mean functional trajectories of the EEG time-series curves between genders across the trial time window.
-
