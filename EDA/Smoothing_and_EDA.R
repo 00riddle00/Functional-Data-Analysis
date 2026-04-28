@@ -1,3 +1,4 @@
+# vim: set ft=r tw=88 nu ai et ts=2 sw=2:
 # ==============================================================================
 #
 #  Smoothing and Exploratory Data Analysis
@@ -290,7 +291,7 @@ cairo_pdf(file.path(out_dir, "08_centrality_dispersion.pdf"),
           width = 14, height = 7, bg = "transparent")
 par(bg = NA)
 opar <- par(mfrow = c(1, 2), bg = NA)
- 
+
 yrng <- quantile(Y_eval, probs = c(0.01, 0.99))
 
 plot(func.mean(fdataobj), ylim = yrng,
@@ -484,9 +485,7 @@ legend("topleft",
        col = c("black", "steelblue3", "#FF8C00", "forestgreen", "purple3"),
        lty = c(1, 2, 3, 4, 5),
        lwd = c(1.5, 1.5, 1.5, 1.5, 1.5),
-       cex = 0.8,
-       bg = adjustcolor("white", alpha.f = 0.9))
-
+       cex = 0.8)
 dev.off()
 cat("Saved: 13_pca_harmonics.pdf\n")
 
@@ -569,7 +568,7 @@ for (i in 1:5) {
     eval.fd(t_fine, fd.pca3),
     eval.fd(t_fine, fd.pca4)
   )
-  
+
   yrng <- range(c(orig, recon))
 
   plot(fd.pca1, lwd = 1.5, ylim = yrng, xlab = "Time (s)", ylab = "Amplitude (µV)",
@@ -866,7 +865,7 @@ cat("Saved: 26_rainbow_depth.pdf\n")
 cairo_pdf(file.path(out_dir, "27_bagplot_bivariate.pdf"), width = 8, height = 8,
           bg = "transparent")
 par(bg = NA)
-fboxplot(fds_obj, plot.type = "bivariate", type = "bag", 
+fboxplot(fds_obj, plot.type = "bivariate", type = "bag",
          projmethod = "PCAproj", main = "Bagplot — PCA Scores")
 dev.off()
 cat("Saved: 27_bagplot_bivariate.pdf\n")
@@ -891,7 +890,7 @@ cairo_pdf(file.path(out_dir, "29_hdr_bivariate_007.pdf"), width = 8, height = 8,
           bg = "transparent")
 par(bg = NA)
 fboxplot(fds_obj, plot.type = "bivariate", type = "hdr",
-         alpha = c(0.07, 0.5), projmethod = "PCAproj", 
+         alpha = c(0.07, 0.5), projmethod = "PCAproj",
          main = "HDR Boxplot — Bivariate PCA Scores, α = (0.07, 0.50)")
 dev.off()
 cat("Saved: 29_hdr_bivariate_007.pdf\n")
@@ -899,8 +898,8 @@ cat("Saved: 29_hdr_bivariate_007.pdf\n")
 cairo_pdf(file.path(out_dir, "30_hdr_bivariate_005.pdf"), width = 8, height = 8,
           bg = "transparent")
 par(bg = NA)
-fboxplot(fds_obj, plot.type = "bivariate", type = "hdr", 
-         alpha = c(0.05, 0.5), projmethod = "PCAproj", 
+fboxplot(fds_obj, plot.type = "bivariate", type = "hdr",
+         alpha = c(0.05, 0.5), projmethod = "PCAproj",
          main = "HDR Boxplot — Bivariate PCA Scores, α = (0.05, 0.50)")
 dev.off()
 cat("Saved: 30_hdr_bivariate_005.pdf\n")
@@ -934,7 +933,7 @@ cat("Saved: 32_hdr_functional_005.pdf\n")
 # (from 5_Rainbow2026.R lines 162-166)
 # ==============================================================================
 
-sink(file.path(out_dir, "33_foutliers_results.txt"))
+sink(file.path(out_dir, "33_foutliers_results.txt"), split = TRUE)
 cat("=== robMah ===\n")
 print(foutliers(fds_obj, method = "robMah"))
 cat("\n=== lrt ===\n")
