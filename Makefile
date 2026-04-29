@@ -79,6 +79,11 @@ deps-python: .venv/.stamp
 
 deps-r: renv/.stamp
 
+# Rebuilds venv if requirements.txt has a newer timestamp than .stamp.
+# Note: git operations (pull, checkout) can update file timestamps,
+# causing an unnecessary rebuild. This is harmless but slow —
+# `python -m venv .venv` reinitializes the venv structure without wiping
+# installed packages, and pip skips already-installed dependencies.
 .venv/.stamp: requirements.txt
 	$(PYTHON) -m venv .venv
 	$(VENV_BIN)/pip install --upgrade pip
@@ -86,6 +91,12 @@ deps-r: renv/.stamp
 	$(STAMP_DATE) > $@
 	@echo "Python dependencies installed."
 
+# Rebuilds R library if renv.lock has a newer timestamp than .stamp.
+# Note: git operations (pull, checkout) can update file timestamps,
+# causing an unnecessary rebuild. This is harmless but slow —
+# renv::restore() checks each package and skips already-installed ones.
+# The renv/ directory itself is not wiped; only missing or outdated
+# packages are reinstalled.
 renv/.stamp: renv.lock
 	@mkdir -p renv
 	$(RSCRIPT) -e "\
@@ -128,25 +139,16 @@ $(RAW_DATA_DIR)/.stamp:
 #   rm ds006018_per_stimuli/.stamp && make stimuli
 stimuli: $(STIMULI_DIR)/.stamp
 
+# TODO: consider replacing notebook execution with .py/.R scripts for pipeline
 $(STIMULI_DIR)/.stamp: $(RAW_DATA_DIR)/.stamp
-	cd $(NOTEBOOKS) && $(VENV_BIN)/jupyter nbconvert \
+	$(VENV_BIN)/jupyter nbconvert \
 		--to notebook \
 		--execute \
 		--inplace \
-		03_data_preparation.ipynb
+		$(NOTEBOOKS)/03_data_preparation.ipynb
+	@mkdir -p $(dir $@)
 	$(STAMP_DATE) > $@
 	@echo "Per-stimulus CSVs generated."
-
-# TODO: consider replacing notebook execution with .py/.R scripts for pipeline
-#$(STIMULI_DIR)/.stamp: $(RAW_DATA_DIR)/.stamp
-	#$(VENV_BIN)/jupyter nbconvert \
-		#--to notebook \
-		#--execute \
-		#--inplace \
-		#$(NOTEBOOKS)/03_data_preparation.ipynb
-	#@mkdir -p $(dir $@)
-	#$(STAMP_DATE) > $@
-	#@echo "Per-stimulus CSVs generated."
 
 # --- Step 3b (optional): F7 .rds files ---------------------------------------
 #
@@ -158,8 +160,9 @@ functional: $(FUNC_DIR)/.stamp
 $(FUNC_DIR)/.stamp: $(STIMULI_DIR)/.stamp
 	$(VENV_BIN)/jupyter nbconvert \
 		--to notebook \
-		--execute $(NOTEBOOKS)/04_data_preparation_R.ipynb \
-		--output /dev/null
+		--execute \
+		--inplace \
+		$(NOTEBOOKS)/04_data_preparation_R.ipynb
 	$(STAMP_DATE) > $@
 	@echo "Functional .rds files generated."
 
