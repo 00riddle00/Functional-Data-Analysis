@@ -43,8 +43,8 @@ PRESENTATION_2 := $(PRES_DIR)/presentation_2nd.pdf
 
 # --- Phony targets -----------------------------------------------------------
 
-.PHONY: all deps deps-python deps-r data stimuli functional assemble eda hypothesis_testing \
-	presentation_1 presentation_2 clean distclean help
+.PHONY: all deps deps-python deps-r sync-requirements sync-uv data stimuli functional assemble \
+	eda hypothesis_testing presentation_1 presentation_2 clean distclean help
 
 # --- Default: full pipeline --------------------------------------------------
 
@@ -56,19 +56,21 @@ all: deps data stimuli assemble eda presentation_1 presentation_2
 
 help:
 	@echo ""
-	@echo "  make all             Run the full pipeline from scratch"
-	@echo "  make deps            Install Python and R dependencies"
-	@echo "  make data            Acquire raw EEG data via datalad"
-	@echo "  make stimuli         Raw EEG -> per-stimulus CSVs (~40 min)"
-	@echo "  make functional      Generate F7 .rds files (optional, ~40 min)"
-	@echo "  make assemble        CSVs -> subject matrix CSV"
-	@echo "  make eda             Smoothing + full EDA"
-	@echo "  make presentation_1  Compile LaTeX slides for 1st presentation"
-	@echo "  make presentation_2  Compile LaTeX slides for 2nd presentation"
-	@echo "  make clean           Remove EDA outputs and presentation build files"
-	@echo "  make distclean       clean + remove all generated data folders (caution)"
-	@echo "  make clean-env       Remove Python venv and R library (for testing)"
-	@echo "  make help            show this message"
+	@echo "  make all                  Run the full pipeline from scratch"
+	@echo "  make deps                 Install Python and R dependencies"
+	@echo "  make export-requirements  Export uv lockfile to requirements.txt"
+	@echo "  make import-requirements  Import requirements.txt changes into uv"
+	@echo "  make data                 Acquire raw EEG data via datalad"
+	@echo "  make stimuli              Raw EEG -> per-stimulus CSVs (~40 min)"
+	@echo "  make functional           Generate F7 .rds files (optional, ~40 min)"
+	@echo "  make assemble             CSVs -> subject matrix CSV"
+	@echo "  make eda                  Smoothing + full EDA"
+	@echo "  make presentation_1       Compile LaTeX slides for 1st presentation"
+	@echo "  make presentation_2       Compile LaTeX slides for 2nd presentation"
+	@echo "  make clean                Remove EDA outputs and presentation build files"
+	@echo "  make distclean            Clean + remove all generated data folders (caution)"
+	@echo "  make clean-env            Remove Python venv and R library (for testing)"
+	@echo "  make help                 Show this message"
 	@echo ""
 
 # --- Step 1: Dependencies ----------------------------------------------------
@@ -110,6 +112,21 @@ renv/.stamp: renv.lock
 	"
 	$(STAMP_DATE) > $@
 	@echo "R dependencies installed and IRkernel registered."
+
+# Export uv-managed dependencies to classic requirements.txt
+export-requirements:
+	uv export \
+	  --format requirements-txt \
+	  --no-hashes \
+	  --no-header \
+	  --no-annotate \
+	  > requirements.txt
+
+# Import updated requirements.txt into uv workflow
+import-requirements:
+	uv add -r requirements.txt
+	uv lock
+	uv sync
 
 # --- Step 2: Raw data --------------------------------------------------------
 #

@@ -140,6 +140,23 @@ $ source .venv/bin/activate      # Linux/macOS
 (.venv) $ pip install -r requirements.txt
 ```
 
+**uv vs. pip:**
+
+This project uses `uv` internally for Python dependency locking. `requirements.txt`
+is kept as a `pip`-compatible export for university setup.
+
+After changing dependencies with `uv`, run:
+
+```bash
+$ make export-requirements
+```
+
+After changing dependencies with pip and updating `requirements.txt`, run:
+
+```bash
+$ make import-requirements
+```
+
 **R:**
 
 Run in R console:
@@ -315,19 +332,21 @@ The presentations use Beamer with XeLaTeX. If `latexmk` is unavailable, run
 ## Make targets
 
 ```bash
-$ make help              # show all available targets
-$ make all               # run the full pipeline from scratch
-$ make deps              # install Python and R dependencies
-$ make data              # acquire raw EEG data via datalad
-$ make stimuli           # raw EEG → per-stimulus CSVs (~40 min)
-$ make functional        # generate F7 .rds files (optional, ~40 min)
-$ make assemble          # CSVs → subject matrix CSV
-$ make eda               # smoothing + full EDA
-$ make hypothesis_testing  # functional hypothesis tests + plots
-$ make presentation_1    # compile LaTeX slides for 1st presentation
-$ make presentation_2    # compile LaTeX slides for 2nd presentation
-$ make clean             # remove generated outputs
-$ make distclean         # clean + remove all generated data folders
+$ make help                 # Show all available targets
+$ make all                  # Run the full pipeline from scratch
+$ make deps                 # Install Python and R dependencies
+$ make export-requirements  # Export uv dependencies to requirements.txt
+$ make import-requirements  # Import requirements.txt into uv
+$ make data                 # Acquire raw EEG data via datalad
+$ make stimuli              # Raw EEG → per-stimulus CSVs (~40 min)
+$ make functional           # Generate F7 .rds files (optional, ~40 min)
+$ make assemble             # CSVs → subject matrix CSV
+$ make eda                  # Smoothing + full EDA
+$ make hypothesis_testing   # Functional hypothesis tests + plots
+$ make presentation_1       # Compile LaTeX slides for 1st presentation
+$ make presentation_2       # Compile LaTeX slides for 2nd presentation
+$ make clean                # Remove generated outputs
+$ make distclean            # Clean + remove all generated data folders
 ```
 
 Full pipeline from scratch:
