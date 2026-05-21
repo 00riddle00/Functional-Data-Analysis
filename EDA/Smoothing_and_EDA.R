@@ -83,7 +83,6 @@ cat("Basis functions:", nbasis, "\n")
 
 # ==============================================================================
 # GCV to choose lambda
-# (from Smoothing_fda_ch05.R lines 110-123)
 # ==============================================================================
 
 Lfdobj  <- 2
@@ -216,7 +215,6 @@ n_subj <- ncol(Y_eval)
 
 # ==============================================================================
 # PART 1: MEAN, SD, COVARIANCE
-# (from 2_EDA_for_FDA2026.R lines 45-52)
 # ==============================================================================
 
 meanfd <- mean.fd(fd_smooth)
@@ -282,7 +280,6 @@ cat("Saved: 07_covariance_image.pdf\n")
 
 # ==============================================================================
 # PART 2: CENTRALITY AND DISPERSION MEASURES
-# (from 2_EDA_for_FDA2026.R lines 96-142)
 # ==============================================================================
 
 fdataobj <- fdata(t(Y_eval), argvals = t_fine)
@@ -336,7 +333,6 @@ cat("Saved: 08_centrality_dispersion.pdf\n")
 
 # ==============================================================================
 # PART 3: FUNCTIONAL DEPTH
-# (from 4_Boxplots_and_outliers2026.R lines 17-22)
 # ==============================================================================
 
 out.FM <- depth.FM(fdataobj, trim = 0.1, draw = FALSE)
@@ -425,7 +421,6 @@ cat("Saved: 11_depth_RP.pdf\n")
 
 # ==============================================================================
 # PART 4: PCA
-# (from 3_PCA_for_FDA2026.R lines 16-21)
 # ==============================================================================
 
 nharm   <- 4
@@ -628,7 +623,6 @@ cat("Saved: 16_pca_reconstruction.pdf\n")
 
 # ==============================================================================
 # PART 5: VARIMAX ROTATION
-# (from 3_PCA_for_FDA2026.R lines 86-91)
 # ==============================================================================
 
 varmx <- varmx.pca.fd(pcalist)
@@ -704,7 +698,6 @@ cat("Saved: 19_varimax_scores.pdf\n")
 
 # ==============================================================================
 # PART 6: FUNCTIONAL BOXPLOTS
-# (from 4_Boxplots_and_outliers2026.R lines 44, 99-103)
 # ==============================================================================
 
 cairo_pdf(file.path(out_dir, "20_boxplot_fd.pdf"), width = 10, height = 6,
@@ -781,7 +774,6 @@ cat("Saved: 22_fbplot_BD2.pdf\n")
 
 # ==============================================================================
 # PART 7: BAND DEPTH AND MODIFIED BAND DEPTH
-# (from 4_Boxplots_and_outliers2026.R lines 60-88)
 # ==============================================================================
 
 bd <- band_depth(dt = t(Y_eval))
@@ -808,7 +800,6 @@ cat("Saved: 23_band_depths.pdf\n")
 
 # ==============================================================================
 # PART 8: MUOD OUTLIER DETECTION
-# (from 4_Boxplots_and_outliers2026.R lines 93-94)
 # ==============================================================================
 
 m <- muod(t(Y_eval), cut_method = "boxplot")
@@ -831,7 +822,6 @@ cat("Saved: 24_muod.pdf\n")
 
 # ==============================================================================
 # PART 9: RAINBOW PLOTS
-# (from 5_Rainbow2026.R lines 118-136)
 # ==============================================================================
 
 fds_obj <- fds(x = t_fine, y = Y_eval,
@@ -859,7 +849,6 @@ cat("Saved: 26_rainbow_depth.pdf\n")
 
 # ==============================================================================
 # PART 10: FUNCTIONAL BAGPLOT
-# (from 5_Rainbow2026.R lines 138-142)
 # ==============================================================================
 
 cairo_pdf(file.path(out_dir, "27_bagplot_bivariate.pdf"), width = 8, height = 8,
@@ -883,7 +872,6 @@ cat("Saved: 28_bagplot_functional.pdf\n")
 
 # ==============================================================================
 # PART 11: HDR BOXPLOT
-# (from 5_Rainbow2026.R lines 63-87)
 # ==============================================================================
 
 cairo_pdf(file.path(out_dir, "29_hdr_bivariate_007.pdf"), width = 8, height = 8,
@@ -930,7 +918,6 @@ cat("Saved: 32_hdr_functional_005.pdf\n")
 
 # ==============================================================================
 # PART 12: FUNCTIONAL OUTLIER DETECTION
-# (from 5_Rainbow2026.R lines 162-166)
 # ==============================================================================
 
 sink(file.path(out_dir, "33_foutliers_results.txt"), split = TRUE)
