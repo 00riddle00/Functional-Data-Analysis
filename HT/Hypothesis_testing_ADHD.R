@@ -7,11 +7,6 @@
 # Flanker Task EEG — Channel FC1
 # ADHD group: 12 subjects | non-ADHD group: 39 subjects
 #
-# Tests (from lecturer's scripts):
-#   1. Pointwise Z-test (Ztwosample.R)
-#   2. L2-norm-based test (L2stattwosample.R)
-#   3. F-type test (Fstattwosample.R)
-#   4. Permutation test (tperm.fd from fda package)
 ################################################################################
 
 # Create output directory if it doesn't exist
