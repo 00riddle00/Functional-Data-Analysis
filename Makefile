@@ -31,15 +31,20 @@ HT_OUT_DIR  := $(HT_DIR)/outputs
 RAW_DATA_URL := https://github.com/OpenNeuroDatasets/ds006018.git
 
 # Input/output files
-SUBJECT_CSV    := $(EDA_DIR)/Flanker_stimulus_FC1_channel.csv
-SUBJECT_META   := $(EDA_DIR)/subject_metadata.csv
-FD_SMOOTH      := $(EDA_OUT_DIR)/fd_smooth.rds
-HT_PLOTS       := $(HT_OUT_DIR)/HT_01_group_comparison.pdf
-STIMULI_DIR    := ds006018_per_stimuli
-FUNC_DIR       := ds006018_functional
-RAW_DATA_DIR   := ds006018
-PRESENTATION_1 := $(PRES_DIR)/presentation_1st.pdf
-PRESENTATION_2 := $(PRES_DIR)/presentation_2nd.pdf
+SUBJECT_CSV     := $(EDA_DIR)/Flanker_stimulus_FC1_channel.csv
+SUBJECT_META    := $(EDA_DIR)/subject_metadata.csv
+FD_SMOOTH       := $(EDA_OUT_DIR)/fd_smooth.rds
+# HT_01 also tracks HT_02, HT_03, and HT_04 since they are generated together in the same script.
+HT_PLOTS        := $(HT_OUT_DIR)/HT_01_group_comparison.pdf
+# HT_05 also tracks HT_06, HT_07, and HT_08.
+HT_PLOTS_GENDER := $(HT_OUT_DIR)/HT_05_gender_group_comparison.pdf
+# HT_09 also tracks HT_10, HT_11, and HT_12.
+HT_PLOTS_SES    := $(HT_OUT_DIR)/HT_09_ses_group_comparison.pdf
+STIMULI_DIR     := ds006018_per_stimuli
+FUNC_DIR        := ds006018_functional
+RAW_DATA_DIR    := ds006018
+PRESENTATION_1  := $(PRES_DIR)/presentation_1st.pdf
+PRESENTATION_2  := $(PRES_DIR)/presentation_2nd.pdf
 
 # --- Phony targets -----------------------------------------------------------
 
@@ -48,7 +53,7 @@ PRESENTATION_2 := $(PRES_DIR)/presentation_2nd.pdf
 
 # --- Default: full pipeline --------------------------------------------------
 
-all: deps data stimuli assemble eda presentation_1 presentation_2
+all: deps data stimuli assemble eda hypothesis_testing presentation_1 presentation_2
 	@echo ""
 	@echo "=== Full pipeline complete. ==="
 
@@ -201,11 +206,19 @@ $(FD_SMOOTH): $(EDA_DIR)/Smoothing_and_EDA.R $(SUBJECT_CSV)
 
 # --- Step 6: Hypothesis testing ----------------------------------------------
 
-hypothesis_testing: $(HT_PLOTS)
+hypothesis_testing: $(HT_PLOTS) $(HT_PLOTS_GENDER) $(HT_PLOTS_SES)
 
 $(HT_PLOTS): $(HT_DIR)/Hypothesis_testing_ADHD.R $(FD_SMOOTH)
 	$(RSCRIPT) $(HT_DIR)/Hypothesis_testing_ADHD.R
-	@echo "Hypothesis testing complete. Outputs in $(HT_OUT_DIR)/"
+	@echo "Hypothesis testing (ADHD) complete. Outputs in $(HT_OUT_DIR)/"
+
+$(HT_PLOTS_GENDER): $(HT_DIR)/Hypothesis_testing_Gender.R $(FD_SMOOTH)
+	$(RSCRIPT) $(HT_DIR)/Hypothesis_testing_Gender.R
+	@echo "Hypothesis testing (Gender) complete. Outputs in $(HT_OUT_DIR)/"
+
+$(HT_PLOTS_SES): $(HT_DIR)/Hypothesis_testing_SES.R $(FD_SMOOTH)
+	$(RSCRIPT) $(HT_DIR)/Hypothesis_testing_SES.R
+	@echo "Hypothesis testing (SES) complete. Outputs in $(HT_OUT_DIR)/"
 
 # --- Step 7: LaTeX presentations ---------------------------------------------
 
