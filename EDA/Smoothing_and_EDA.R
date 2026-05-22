@@ -52,7 +52,6 @@ cat("Saved: 00_all_curves.pdf\n")
 # Step 1: Smoothing
 ################################################################################
 
-rm(list = ls())
 library(fda)
 
 out_dir <- file.path("./EDA/outputs")
