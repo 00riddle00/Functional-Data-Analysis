@@ -1,22 +1,33 @@
-################################################################################
+# vim: set ft=r tw=88 nu ai et ts=2 sw=2:
+# ==============================================================================
 # Function-on-Scalar Regression
 # Model: EEG(t) = beta_0(t) + beta_1(t)*ADHD + beta_2(t)*Gender + eps(t)
 #
 # Predictors: ADHD_binary, Gender
 # Response: smoothed EEG curve at channel FC1
 # Flanker Task — Stimulus-Locked
-################################################################################
+# ==============================================================================
 
-rm(list = ls())
+# Create output directory if it doesn't exist
+out_dir <- file.path("./REG/outputs")
+dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+
+# Clean previous outputs to avoid corrupt PDFs from incomplete overwrites
+old_files <- list.files(out_dir, pattern = "\\.(pdf|rds|txt)$", full.names = TRUE)
+if (length(old_files) > 0) {
+  file.remove(old_files)
+  cat("Cleaned", length(old_files), "old output files.\n")
+}
+
 library(fda)
 library(ggplot2)
-install.packages("refund")
 library(refund)
+
 # ==============================================================================
 # Load smoothed data
 # ==============================================================================
 
-fd_smooth <- readRDS("fd_smooth.rds")
+fd_smooth <- readRDS("./EDA/outputs/fd_smooth.rds")
 sub_names <- colnames(fd_smooth$coefs)
 cat("Total subjects in fd_smooth:", length(sub_names), "\n")
 
@@ -102,7 +113,7 @@ print(summary(fosr.fit))
 # Plot the coefficient functions
 # ==============================================================================
 
-pdf("REG_01_coefficients.pdf", width = 12, height = 5)
+pdf(file.path(out_dir, "REG_01_coefficients.pdf"), width = 12, height = 5)
 plot(fosr.fit, pages = 1, scale = 0,
      main = "Estimated Coefficient Functions")
 dev.off()
@@ -120,7 +131,7 @@ intercept_coef <- coef_obj$smterms$"Intercept(yindex)"$coef
 adhd_coef      <- coef_obj$smterms$"ADHD(yindex)"$coef
 female_coef    <- coef_obj$smterms$"Female(yindex)"$coef
 
-pdf("REG_02_individual_coefficients.pdf", width = 14, height = 5)
+pdf(file.path(out_dir, "REG_02_individual_coefficients.pdf"), width = 14, height = 5)
 par(mfrow = c(1, 3))
 
 # Intercept beta_0(t)
@@ -172,7 +183,7 @@ cat("Saved: REG_02_individual_coefficients.pdf\n")
 
 Y_pred <- predict(fosr.fit)
 
-pdf("REG_03_fitted_vs_observed.pdf", width = 12, height = 6)
+pdf(file.path(out_dir, "REG_03_fitted_vs_observed.pdf"), width = 12, height = 6)
 par(mfrow = c(1, 2))
 
 # Observed
@@ -200,7 +211,7 @@ cat("Saved: REG_03_fitted_vs_observed.pdf\n")
 cat("\nFitting Bayesian function-on-scalar regression (bayes_fosr)...\n")
 bayes.fit <- bayes_fosr(Y ~ ADHD + Female, data = data_fosr)
 
-pdf("REG_04_bayes_coefficients.pdf", width = 12, height = 5)
+pdf(file.path(out_dir, "REG_04_bayes_coefficients.pdf"), width = 12, height = 5)
 par(mfrow = c(1, 3))
 
 t_grid <- seq(0, 1, length.out = ncol(bayes.fit$beta.hat))
