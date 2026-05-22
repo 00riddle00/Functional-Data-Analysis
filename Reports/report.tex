@@ -37,7 +37,7 @@
 
 \setlength{\parindent}{15pt}
 
-\title{Flanker Task EEG functional data analysis}
+\title{Flanker Task EEG Functional Data Analysis}
 
 \author{\name Jonas Adomaitis \email jonas.adomaitis@mif.stud.vu.lt \\
   \name Tomas Giedraitis \email tomas.giedraitis@mif.stud.vu.lt \\
@@ -72,7 +72,7 @@ Functional Data Analysis is a branch of statistics dealing with data that consis
 curves observed over time. The theoretical foundations of Functional Data Analysis are described in
 the seminal textbook of the same name (see \cite{ramsay2006functional}). FDA treats each observation
 as a single functional object rather than a vector of discrete measurements. This perspective is
-particularly useful in neuroscience, where signals such as EEG are mostly continuous.
+particularly useful in neuroscience, where signals such as EEG are inherently continuous.
 
 The Eriksen Flanker task is a well-established cognitive paradigm used to study attention and
 response inhibition (see \cite{Eriksen1974}). Participants are presented with a central target
@@ -96,8 +96,8 @@ data from a cognitive electrophysiology experiment. The objectives are as follow
     expansion with a roughness penalty.
   \item To perform exploratory data analysis including computation of sample mean, standard
     deviation, and covariance functions.
-  \item To identify dominant modes of variation among subjects through Principal Component Analysis
-    (PCA).
+  \item To identify dominant modes of variation among subjects using Principal Component Analysis
+      (PCA).
   \item To detect outlier subjects using functional boxplots and depth-based methods.
   \item To interpret the obtained results in the context of EEG signal analysis.
 \end{itemize}
@@ -110,15 +110,15 @@ data from a cognitive electrophysiology experiment. The objectives are as follow
 
 This dataset contains EEG brain recordings from 127 young adults, together with retrospective
 objective and subjective reports of childhood family socioeconomic status (SES), SES indicators in
-adulthood, self-reports of ADHD symptoms. This project applies Functional Data Analysis methods to
-EEG data from 62 adults recorded during a Flanker task at electrode channel FC1. Data source:
+adulthood, and self-reports of ADHD symptoms. This project applies Functional Data Analysis methods
+to EEG data from 62 adults recorded during a Flanker task at electrode channel FC1. Data source:
 Cognitive Electrophysiology in Socioeconomic Context dataset (see \cite{ds006018:1.2.2}).
 
 % -------------------------------------
 \subsection{Smoothing}
 
 The first step in any FDA workflow is the conversion of discrete observations into smooth functional
-objects, in order to remove measurement noise. A penalized B-spline basis expansion was employed for
+objects, in order to reduce measurement noise. A penalized B-spline basis expansion was employed for
 this purpose, with these specifications:
 
 \begin{enumerate}[
@@ -155,7 +155,7 @@ The sample mean and sample standard deviation functions were computed as:
 
 The mean curve exhibits a gradual positive shift following the stimulus onset, while the standard
 deviation increases from approximately $2~\mu$V during the pre-stimulus baseline to over $10~\mu$V
-after $0.4\,\mathrm{s}$. This indicates that between-subject variability is substantially larger in
+after $0.4\,\mathrm{s}$. This suggests that between-subject variability is substantially larger in
 the post-stimulus window than during the baseline period. The mean $\pm$ SD band contains the
 majority of curves, though several subjects clearly deviate beyond it.
 
@@ -179,10 +179,10 @@ across subjects:
 
 The resulting bivariate function was visualized using both perspective and image plots. The diagonal
 of the covariance surface coincides with the variance function, and the largest values are
-concentrated in the time region $0.5$--$0.7\,\mathrm{s}$ on both axes. This confirms that the late
-post-stimulus response constitutes the dominant source of between-subject variability, whereas the
-pre-stimulus baseline shows near-zero covariance, indicating consistent behaviour across subjects
-during that period.
+concentrated in the time region $0.5$--$0.7\,\mathrm{s}$ on both axes. These results suggest that
+the late post-stimulus response constitutes the dominant source of between-subject variability,
+whereas the pre-stimulus baseline shows near-zero covariance, indicating consistent behaviour across
+subjects during that period.
 
 \begin{figure}[ht]
   \centering
@@ -209,7 +209,7 @@ during that period.
 \subsection{Principal Component Analysis}
 
 Functional Principal Component Analysis (FPCA) was applied to identify the dominant modes of
-variation among subjects. Here are the following harmonics:
+variation among subjects. The explained variance proportions are:
 
 \begin{itemize}[
   itemsep=5pt,
@@ -253,14 +253,15 @@ results.
 \subsection{Outliers}
 
 Several outlier detection methods were applied, including Highest Density Region (HDR) boxplots and
-Massive Unsupervised Outlier Detection (MUOD). Four subjects --- sub-003, sub-040, sub-043, and
-sub-071 --- were identified as outliers by the HDR boxplot at coverage level $\alpha = (0.05,
-0.50)$. All four exhibit substantial negative deflections in the post-stimulus window: sub-071
-(purple) shows the most extreme deviation, reaching approximately $-50~\mu$V after
-$0.6\,\mathrm{s}$, while sub-040 (green) and sub-043 (blue) both descend to about $-20~\mu$V in the
-same time region. Sub-003 (red) shows a milder but still atypical negative pattern. These subjects
-are classified as magnitude outliers, as their waveforms have a similar overall shape to the rest of
-the sample but are shifted significantly away from the group mean.
+Massive Unsupervised Outlier Detection (MUOD). Four subjects --- \texttt{sub-003}, \texttt{sub-040},
+\texttt{sub-043}, and \texttt{sub-071} --- were identified as outliers by the HDR boxplot at
+coverage level $\alpha = (0.05, 0.50)$. All four exhibit substantial negative deflections in the
+post-stimulus window: \texttt{sub-071} (purple) shows the most extreme deviation, reaching
+approximately $-50~\mu$V after $0.6\,\mathrm{s}$, while \texttt{sub-040} (green) and
+\texttt{sub-043} (blue) both descend to about $-20~\mu$V in the same time region. \texttt{sub-003}
+(red) shows a less extreme but still atypical negative pattern. These subjects can be classified as
+magnitude outliers, as their waveforms have a similar overall shape to the rest of the sample but
+are shifted significantly away from the group mean.
 
 \begin{figure}[ht]
   \centering
@@ -272,13 +273,12 @@ the sample but are shifted significantly away from the group mean.
 % -----------------------------------------------------------------------------
 \section{Hypothesis testing}
 
-The objective of this part of the project is to determine whether the functional EEG response curves
-during the Flanker task differ significantly between individuals with ADHD symptoms and those
-without. The ADHD classification is based on the World Health Organization Adult ADHD Self-Report
-Scale (ASRS-V1.1), included in the original dataset. Of the 62 subjects analyzed in the previous
-sections, 12 were classified as having ADHD symptoms, 39 as not having ADHD symptoms, and 11 had
-missing classifications and were excluded from this analysis. The hypotheses tested are formulated
-as:
+The objective of this part of the project is to determine whether the EEG response curves during the
+Flanker task differ significantly between individuals with ADHD symptoms and those without. The ADHD
+classification is based on the World Health Organization Adult ADHD Self-Report Scale (ASRS-V1.1),
+included in the original dataset. Of the 62 subjects analyzed in the previous sections, 12 were
+classified as having ADHD symptoms, 39 as not having ADHD symptoms, and 11 had missing
+classifications and were excluded from this analysis. The hypotheses tested are formulated as:
 
 \begin{align}
   H_0 &: \mu_{\text{ADHD}}(t) = \mu_{\text{non-ADHD}}(t),
@@ -391,7 +391,7 @@ differences in the post-stimulus window, though this did not reach global signif
 \section{Regression}
 
 To further investigate the relationship between EEG response curves and subject characteristics, we
-applied a regression model which is defined as:
+applied the following regression model:
 
 \begin{equation}
   Y_i(t) = \beta_0(t) + \beta_1(t) \cdot \text{ADHD}_i + \beta_2(t) \cdot \text{Female}_i +
@@ -449,9 +449,9 @@ applied a regression model which is defined as:
 The model summary indicates that the smooth intercept term $\beta_0(t)$ is highly significant ($p =
 0.024$), reflecting the structured shape of the average EEG response over time. The ADHD effect
 $\beta_1(t)$ is not significant ($p = 0.842$), consistent with the findings from the hypothesis
-testing. The female effect $\beta_2(t)$ is significant ($p = 0.016$), suggesting that gender does
-have a measurable impact on the EEG response shape at channel FC1. The model achieves an adjusted
-$R^2 = 0.108$, with approximately $11\%$ of the deviance explained.
+testing. The female effect $\beta_2(t)$ is significant ($p = 0.016$), suggesting that gender has a
+measurable impact on the EEG response shape at channel FC1. The model achieves an adjusted $R^2 =
+0.108$, with approximately $11\%$ of the deviance explained.
 
 \begin{table}[ht]
   \centering
@@ -531,7 +531,7 @@ The intercept $\beta_0(t)$ starts at negative values during the pre-stimulus bas
 after stimulus onset, and rises to a peak around $0.5\,\mathrm{s}$. The ADHD coefficient
 $\beta_1(t)$ fluctuates around zero across the entire time range, visually confirming the
 non-significant p-value. The female coefficient $\beta_2(t)$ shows a more negative deflection during
-the post-stimulus window, especially between $0.3$ and $0.6\,\mathrm{s}$. This indicates that female
+the post-stimulus window, especially between $0.3$ and $0.6\,\mathrm{s}$. This suggests that female
 subjects exhibit systematically lower amplitudes.
 
 \begin{figure}[ht]
@@ -563,20 +563,21 @@ variability in EEG responses.
 \section{Conclusion}
 
 This project applied a complete Functional Data Analysis pipeline to EEG data recorded during a
-Flanker cognitive task at electrode channel FC1, using 62 young adults from the publicly available
-Cognitive Electrophysiology in Socioeconomic Context dataset. In the smoothing step, raw discrete
-EEG observations were converted into smooth functional objects using a penalized B-spline basis
-expansion with 20 cubic basis functions. The exploratory data analysis revealed that between-subject
-variability is concentrated in the post-stimulus window ($0.4$--$0.8\,\mathrm{s}$), with the first
-three functional principal components explaining $86.6\%$ of the total variance. Outlier detection
-methods consistently identified a small number of subjects classified as magnitude outliers.
+Flanker cognitive task at electrode channel FC1, using data from 62 young adults from the publicly
+available Cognitive Electrophysiology in Socioeconomic Context dataset. In the smoothing step, raw
+discrete EEG observations were converted into smooth functional objects using a penalized B-spline
+basis expansion with 20 cubic basis functions. The exploratory data analysis revealed that
+between-subject variability is concentrated in the post-stimulus window ($0.4$--$0.8\,\mathrm{s}$),
+with the first three functional principal components explaining $86.6\%$ of the total variance.
+Outlier detection methods consistently identified a small number of subjects classified as magnitude
+outliers.
 
-The hypothesis testing section investigated whether the mean EEG curves differ between subjects
+The hypothesis testing procedures investigated whether the mean EEG curves differ between subjects
 grouped by ADHD status, gender, and socioeconomic status. For the ADHD and gender comparisons, four
 complementary tests were applied: the pointwise Z-test, $L^2$-norm test (naive and bootstrap),
 F-type test (naive and bootstrap), and permutation test. For the three-group SES comparison, a
 functional one-way ANOVA was used. All tests consistently failed to reject the null hypothesis at
-$\alpha = 0.05$, indicating no statistically significant global differences between any of the
+$\alpha = 0.05$, suggesting no statistically significant global differences between any of the
 groups.
 
 The functional regression analysis extended these findings by simultaneously modeling the effects of
@@ -587,7 +588,7 @@ window between $0.3$ and $0.6\,\mathrm{s}$. The relatively low explanatory power
 \approx 0.11$) suggests that substantial individual variability remains unexplained by the included
 covariates.
 
-Overall, the project demonstrates how FDA methods can be applied to electrophysiological data to
+Overall, the project illustrates how FDA methods can be applied to electrophysiological data to
 extract meaningful insights about functional structure, variability, and covariate effects.
 
 \bibliography{samplebib}
