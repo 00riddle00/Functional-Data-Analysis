@@ -45,11 +45,14 @@ FUNC_DIR        := ds006018_functional
 RAW_DATA_DIR    := ds006018
 PRESENTATION_1  := $(PRES_DIR)/presentation_1st.pdf
 PRESENTATION_2  := $(PRES_DIR)/presentation_2nd.pdf
+REG_DIR         := REG
+# REG_01 also tracks REG_02, REG_03, and REG_04.
+REG_PLOTS       := $(REG_DIR)/outputs/REG_01_coefficients.pdf
 
 # --- Phony targets -----------------------------------------------------------
 
 .PHONY: all deps deps-python deps-r sync-requirements sync-uv data stimuli functional assemble \
-	eda hypothesis_testing presentation_1 presentation_2 clean distclean help
+	eda hypothesis_testing presentation_1 presentation_2 regression clean distclean help
 
 # --- Default: full pipeline --------------------------------------------------
 
@@ -70,8 +73,10 @@ help:
 	@echo "  make functional           Generate F7 .rds files (optional, ~40 min)"
 	@echo "  make assemble             CSVs -> subject matrix CSV"
 	@echo "  make eda                  Smoothing + full EDA"
+	@echo "  make hypothesis_testing   Run all hypothesis testing scripts"
 	@echo "  make presentation_1       Compile LaTeX slides for 1st presentation"
 	@echo "  make presentation_2       Compile LaTeX slides for 2nd presentation"
+	@echo "  make regression           Run regression analyses"
 	@echo "  make clean                Remove EDA outputs and presentation build files"
 	@echo "  make distclean            Clean + remove all generated data folders (caution)"
 	@echo "  make clean-env            Remove Python venv and R library (for testing)"
@@ -236,6 +241,14 @@ $(PRESENTATION_2): $(PRES_DIR)/presentation_2nd.tex $(HT_PLOTS)
 	$(LATEXMK) -xelatex -interaction=nonstopmode -outdir=$(PRES_DIR) $(PRES_DIR)/presentation_2nd.tex
 	@echo "Presentation compiled: $(PRESENTATION_2)"
 
+# --- Step 8: Regression ------------------------------------------------------
+
+regression: $(REG_PLOTS)
+
+$(REG_PLOTS): $(REG_DIR)/FDA_regression.R $(FD_SMOOTH)
+	$(RSCRIPT) $(REG_DIR)/FDA_regression.R
+	@echo "Regression complete. Outputs in $(REG_DIR)/outputs/"
+
 # --- Clean -------------------------------------------------------------------
 
 # TODO:
@@ -249,6 +262,7 @@ $(PRESENTATION_2): $(PRES_DIR)/presentation_2nd.tex $(HT_PLOTS)
 clean:
 	rm -f $(EDA_OUT_DIR)/*.pdf $(EDA_OUT_DIR)/*.rds $(EDA_OUT_DIR)/*.txt
 	rm -f $(HT_OUT_DIR)/*.pdf $(HT_OUT_DIR)/*.rds $(HT_OUT_DIR)/*.txt
+	rm -f $(REG_DIR)/outputs/*.pdf
 	rm -f $(SUBJECT_CSV) $(SUBJECT_META)
 	git clean -fdX -- $(PRES_DIR)
 	@echo "Cleaned EDA, HT outputs and presentation build files."
