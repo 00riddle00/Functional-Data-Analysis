@@ -59,7 +59,11 @@ FC1 over the time window from $-0.2\,\mathrm{s}$ to $0.8\,\mathrm{s}$ relative t
 The raw discrete observations were converted into smooth functional objects using a penalized
 B-spline basis smoothing. Exploratory data analysis was then performed, including descriptive
 statistics (mean, standard deviation, covariance), principal component analysis (PCA), and
-depth-based outlier detection methods.
+depth-based outlier detection methods. Hypothesis testing revealed no statistically significant
+differences between groups defined by ADHD status, gender, or socioeconomic status. A
+function-on-scalar regression model further identified a significant effect of gender on the EEG
+response shape, with female subjects exhibiting systematically lower amplitudes in the post-stimulus
+window.
 \end{abstract}
 
 \begin{keywords}
@@ -102,6 +106,10 @@ data from a cognitive electrophysiology experiment. The objectives are as follow
       (PCA).
   \item To detect outlier subjects using functional boxplots and depth-based methods.
   \item To interpret the obtained results in the context of EEG signal analysis.
+  \item To test for statistically significant differences in EEG response curves between groups
+    defined by ADHD status, gender, and socioeconomic status.
+  \item To model the relationship between subject characteristics and EEG response curves using
+    functional regression analysis.
 \end{itemize}
 
 % -----------------------------------------------------------------------------
@@ -267,8 +275,9 @@ approximately $-50~\mu$V after $0.6\,\mathrm{s}$, while \texttt{sub-040} (green)
 \texttt{sub-043} (blue) both descend to about $-20~\mu$V in the same time region. \texttt{sub-003}
 (red) shows a less extreme but still atypical negative pattern. These subjects can be classified as
 magnitude outliers, as their waveforms have a similar overall shape to the rest of the sample but
-are shifted significantly away from the group mean. The detected magnitude outliers are illustrated
-in Figure~\ref{fig:hdr_boxplot}.
+are shifted significantly away from the group mean. The four identified outlier subjects were
+retained in the subsequent hypothesis testing and regression analyses to preserve sample size. The
+detected magnitude outliers are illustrated in Figure~\ref{fig:hdr_boxplot}.
 
 \begin{figure}[ht]
   \centering
@@ -399,8 +408,10 @@ differences in the post-stimulus window, though this did not reach global signif
 % -----------------------------------------------------------------------------
 \section{Regression}
 
-To further investigate the relationship between EEG response curves and subject characteristics, we
-applied the following regression model:
+To further investigate the relationship between EEG response curves and subject characteristics, a
+function-on-scalar regression model was fitted. The regression was performed on the 51 subjects with
+known ADHD classification, excluding the 11 subjects with missing ADHD status. The model is defined
+as:
 
 \begin{equation}
   Y_i(t) = \beta_0(t) + \beta_1(t) \cdot \text{ADHD}_i + \beta_2(t) \cdot \text{Female}_i +
