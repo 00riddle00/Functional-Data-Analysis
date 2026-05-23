@@ -48,11 +48,13 @@ PRESENTATION_2  := $(PRES_DIR)/presentation_2nd.pdf
 REG_DIR         := REG
 # REG_01 also tracks REG_02, REG_03, and REG_04.
 REG_PLOTS       := $(REG_DIR)/outputs/REG_01_coefficients.pdf
+REPORTS_DIR     := Reports
+REPORT          := $(REPORTS_DIR)/final_report.pdf
 
 # --- Phony targets -----------------------------------------------------------
 
 .PHONY: all deps deps-python deps-r sync-requirements sync-uv data stimuli functional assemble \
-	eda hypothesis_testing presentation_1 presentation_2 regression clean distclean help
+	eda hypothesis_testing presentation_1 presentation_2 regression report clean distclean help
 
 # --- Default: full pipeline --------------------------------------------------
 
@@ -77,6 +79,7 @@ help:
 	@echo "  make presentation_1       Compile LaTeX slides for 1st presentation"
 	@echo "  make presentation_2       Compile LaTeX slides for 2nd presentation"
 	@echo "  make regression           Run regression analyses"
+	@echo "  make report               Compile final LaTeX report PDF"
 	@echo "  make clean                Remove EDA outputs and presentation build files"
 	@echo "  make distclean            Clean + remove all generated data folders (caution)"
 	@echo "  make clean-env            Remove Python venv and R library (for testing)"
@@ -249,6 +252,17 @@ $(REG_PLOTS): $(REG_DIR)/FDA_regression.R $(FD_SMOOTH)
 	$(RSCRIPT) $(REG_DIR)/FDA_regression.R
 	@echo "Regression complete. Outputs in $(REG_DIR)/outputs/"
 
+# --- Step 9: Final report ----------------------------------------------------
+
+report: $(REPORT)
+
+$(REPORT): $(REPORTS_DIR)/final_report.tex $(HT_PLOTS) $(HT_PLOTS_GENDER) $(HT_PLOTS_SES) $(REG_PLOTS)
+	cp $(EDA_OUT_DIR)/*.pdf $(REPORTS_DIR)/ 2>/dev/null || true
+	cp $(HT_OUT_DIR)/*.pdf $(REPORTS_DIR)/ 2>/dev/null || true
+	cp $(REG_DIR)/outputs/*.pdf $(REPORTS_DIR)/ 2>/dev/null || true
+	$(LATEXMK) -pdf -interaction=nonstopmode -outdir=$(REPORTS_DIR) $(REPORTS_DIR)/final_report.tex
+	@echo "Report compiled: $(REPORT)"
+
 # --- Clean -------------------------------------------------------------------
 
 # TODO:
@@ -263,6 +277,7 @@ clean:
 	rm -f $(EDA_OUT_DIR)/*.pdf $(EDA_OUT_DIR)/*.rds $(EDA_OUT_DIR)/*.txt
 	rm -f $(HT_OUT_DIR)/*.pdf $(HT_OUT_DIR)/*.rds $(HT_OUT_DIR)/*.txt
 	rm -f $(REG_DIR)/outputs/*.pdf
+	rm -f $(REPORTS_DIR)/*.pdf
 	rm -f $(SUBJECT_CSV) $(SUBJECT_META)
 	git clean -fdX -- $(PRES_DIR)
 	@echo "Cleaned EDA, HT outputs and presentation build files."
