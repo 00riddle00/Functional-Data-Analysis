@@ -240,6 +240,16 @@ mean/SD, covariance, FPCA, depth, outlier detection, boxplots, rainbow plots.
 
 ### Step 5: Hypothesis testing
 
+There were three hypotheses made:
+
+- **H1:** The shape and amplitude of the functional EEG curves over time are
+  significantly associated with **ADHD symptom presence (ADHD vs. non-ADHD
+  classification)**.
+- **H2:** There is a significant difference in the mean functional trajectories of the
+  EEG time-series curves **between genders** across the trial time window.
+- **H3:** Self-reported **socioeconomic status (SES)** significantly predicts the
+  temporal dynamics and amplitude of the mean functional ERP curves.
+
 ```bash
 $ Rscript HT/Hypothesis_testing_ADHD.R
 $ Rscript HT/Hypothesis_testing_Gender.R
@@ -394,11 +404,3 @@ Full pipeline from scratch:
 ```bash
 $ make all
 ```
-
-## Hypothesis Testing
-
-### H1: The shape and amplitude of the functional EEG curves over time are significantly associated with continuous ADHD symptom severity scores.
-
-### H2: Self-reported socioeconomic status significantly predicts the temporal dynamics and amplitude of the mean functional ERP curves.
-
-### H3: There is a significant difference in the mean functional trajectories of the EEG time-series curves between genders across the trial time window.
