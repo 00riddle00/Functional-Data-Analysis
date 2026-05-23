@@ -205,7 +205,7 @@ dev.off()
 cat("Saved: REG_03_fitted_vs_observed.pdf\n")
 
 # ==============================================================================
-# Bayesian function-on-scalar alternative (from lecturer's script)
+# Bayesian function-on-scalar alternative
 # ==============================================================================
 
 cat("\nFitting Bayesian function-on-scalar regression (bayes_fosr)...\n")
