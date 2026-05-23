@@ -34,6 +34,7 @@
 \ShortHeadings{EEG functional data analysis}{Adomaitis, Giedraitis, Ber\v{z}inskas}
 \firstpageno{1}
 
+% --------------------------------------------------------------------------------------
 \begin{document}
 
 \setlength{\parindent}{15pt}
@@ -134,6 +135,8 @@ this purpose, with these specifications:
   \item Smoothing parameter: $\lambda$ selected via Generalized Cross-Validation (GCV).
 \end{enumerate}
 
+The effect of the smoothing procedure is illustrated in Figure~\ref{fig:smoothing}.
+
 \begin{figure}[ht]
   \centering
   \includegraphics[scale=0.5]{02_before_after_smoothing.pdf}
@@ -158,7 +161,8 @@ The mean curve exhibits a gradual positive shift following the stimulus onset, w
 deviation increases from approximately $2~\mu$V during the pre-stimulus baseline to over $10~\mu$V
 after $0.4\,\mathrm{s}$. This suggests that between-subject variability is substantially larger in
 the post-stimulus window than during the baseline period. The mean $\pm$ SD band contains the
-majority of curves, though several subjects clearly deviate beyond it.
+majority of curves, though several subjects clearly deviate beyond it. The sample mean function and
+pointwise standard deviation are shown in Figure~\ref{fig:mean_sd}.
 
 \begin{figure}[ht]
   \centering
@@ -183,7 +187,7 @@ of the covariance surface coincides with the variance function, and the largest 
 concentrated in the time region $0.5$--$0.7\,\mathrm{s}$ on both axes. These results suggest that
 the late post-stimulus response constitutes the dominant source of between-subject variability,
 whereas the pre-stimulus baseline shows near-zero covariance, indicating consistent behaviour across
-subjects during that period.
+subjects during that period. The covariance structure is visualized in Figure~\ref{fig:covariance}.
 
 \begin{figure}[ht]
   \centering
@@ -225,7 +229,8 @@ variation among subjects. The explained variance proportions are:
 \end{itemize}
 
 The first three components cumulatively explain 86.6\% of the total variability, indicating that the
-functional data can be effectively summarized by a low-dimensional representation.
+functional data can be effectively summarized by a low-dimensional representation. The first four
+functional principal component harmonics are displayed in Figure~\ref{fig:pca_harmonics}.
 
 \begin{figure}[ht]
   \centering
@@ -241,7 +246,7 @@ Functional boxplots based on Modified Band Depth (MBD) and Band Depth (BD2) were
 central and outlying curves. The central 50\% region (analogous to the interquartile range in
 classical boxplots), together with the median curve and the fences beyond which curves are flagged
 as outliers, were displayed. Both methods identified the same outlier subjects, providing consistent
-results.
+results. The resulting functional boxplot is shown in Figure~\ref{fig:mbd_boxplot}.
 
 \begin{figure}[ht]
   \centering
@@ -262,7 +267,8 @@ approximately $-50~\mu$V after $0.6\,\mathrm{s}$, while \texttt{sub-040} (green)
 \texttt{sub-043} (blue) both descend to about $-20~\mu$V in the same time region. \texttt{sub-003}
 (red) shows a less extreme but still atypical negative pattern. These subjects can be classified as
 magnitude outliers, as their waveforms have a similar overall shape to the rest of the sample but
-are shifted significantly away from the group mean.
+are shifted significantly away from the group mean. The detected magnitude outliers are illustrated
+in Figure~\ref{fig:hdr_boxplot}.
 
 \begin{figure}[ht]
   \centering
@@ -295,7 +301,8 @@ The 62 smoothed EEG curves were divided into two functional samples according to
 classification. The ADHD group consists of 12 subjects, while the non-ADHD group consists of 39
 subjects. Visual inspection of the two groups reveals broadly similar patterns of variability around
 the group mean. Both groups exhibit relatively flat behavior during the pre-stimulus baseline and
-increased variability in the post-stimulus window.
+increased variability in the post-stimulus window. The grouped EEG response curves are presented in
+Figure~\ref{fig:group_comparison}.
 
 \begin{figure}[ht]
   \centering
@@ -307,7 +314,8 @@ increased variability in the post-stimulus window.
 The mean functions of the two groups were computed separately and overlaid for comparison. The
 non-ADHD mean curve (blue) shows a sustained positive shift after $0.4\,\mathrm{s}$, peaking at
 approximately $+6~\mu$V around $0.7\,\mathrm{s}$. The ADHD mean curve (red) follows a similar shape
-but with a smaller amplitude in the post-stimulus window, reaching approximately $+4~\mu$V.
+but with a smaller amplitude in the post-stimulus window, reaching approximately $+4~\mu$V. The
+group mean functions are compared in Figure~\ref{fig:mean_comparison}.
 
 \begin{figure}[ht]
   \centering
@@ -320,7 +328,7 @@ but with a smaller amplitude in the post-stimulus window, reaching approximately
 \subsection{Results and Conclusion}
 
 Hypothesis tests were applied to assess whether the two group mean functions differ significantly.
-The results are summarized in the table below:
+The results are summarized in Table~\ref{tab:hypothesis_tests}.
 
 \begin{table}[ht]
   \centering
@@ -399,6 +407,8 @@ applied the following regression model:
   \varepsilon_i(t), \qquad t \in [-0.2\,\mathrm{s},\, 0.8\,\mathrm{s}]
 \end{equation}
 
+The terms used in the regression model are described in Table~\ref{tab:model_terms}.
+
 \begin{table}[ht]
   \centering
   \begin{tabular}{cll}
@@ -452,7 +462,8 @@ The model summary indicates that the smooth intercept term $\beta_0(t)$ is highl
 $\beta_1(t)$ is not significant ($p = 0.842$), consistent with the findings from the hypothesis
 testing. The female effect $\beta_2(t)$ is significant ($p = 0.016$), suggesting that gender has a
 measurable impact on the EEG response shape at channel FC1. The model achieves an adjusted $R^2 =
-0.108$, with approximately $11\%$ of the deviance explained.
+0.108$, with approximately $11\%$ of the deviance explained. A detailed summary of the fitted
+regression model is provided in Table~\ref{tab:model_summary}.
 
 \begin{table}[ht]
   \centering
@@ -533,7 +544,8 @@ after stimulus onset, and rises to a peak around $0.5\,\mathrm{s}$. The ADHD coe
 $\beta_1(t)$ fluctuates around zero across the entire time range, visually confirming the
 non-significant p-value. The female coefficient $\beta_2(t)$ shows a more negative deflection during
 the post-stimulus window, especially between $0.3$ and $0.6\,\mathrm{s}$. This suggests that female
-subjects exhibit systematically lower amplitudes.
+subjects exhibit systematically lower amplitudes. The estimated functional regression coefficients
+are shown in Figure~\ref{fig:coefficients}.
 
 \begin{figure}[ht]
   \centering
@@ -545,7 +557,8 @@ subjects exhibit systematically lower amplitudes.
 The observed curves span a wide range from approximately $-20~\mu$V to $+40~\mu$V with substantial
 individual variability, while the fitted curves are restricted to roughly $-6$ to $+6~\mu$V. This
 visible reduction in range illustrates the low $R^2$ --- the model captures the average behavior
-driven by ADHD and gender but not other factors not included in the model.
+driven by ADHD and gender but not other factors not included in the model. A comparison of the
+observed and fitted EEG curves is presented in Figure~\ref{fig:fitted_vs_observed}.
 
 \begin{figure}[ht]
   \centering
