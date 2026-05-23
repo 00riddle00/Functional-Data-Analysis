@@ -72,7 +72,7 @@ Needed to acquire the raw 10 GB EEG data.
 
 ### LaTeX
 
-Needed to compile the presentations locally.
+Needed to compile the presentations and final report locally.
 
 - **Linux:** `$ sudo apt install texlive-full` (or minimal:
   `$ sudo apt install texlive-base texlive-latex-recommended texlive-latex-extra
@@ -170,7 +170,7 @@ Run in R console:
 
 ## Pipeline
 
-The pipeline has 6 steps. Each depends on the output of the previous one. Run `$ make
+The pipeline has 9 steps. Each depends on the output of the previous one. Run `$ make
 all` to execute the full pipeline, or run each step individually.
 
 ### Step 1: Acquire raw EEG data (10+ GB, takes a while)
@@ -199,7 +199,7 @@ task per stimulus.
 ### Step 2b (optional): Generate smoothed .rds files (~40 min)
 
 Only needed if you want F7-channel functional data objects. The main analysis (Steps
-3–6) does not use these — it extracts FC1 directly from the CSVs.
+3–9) does not use these — it extracts FC1 directly from the CSVs.
 
 ```bash
 (.venv) $ jupyter nbconvert \
@@ -242,15 +242,30 @@ mean/SD, covariance, FPCA, depth, outlier detection, boxplots, rainbow plots.
 
 ```bash
 $ Rscript HT/Hypothesis_testing_ADHD.R
+$ Rscript HT/Hypothesis_testing_Gender.R
+$ Rscript HT/Hypothesis_testing_SES.R
 ```
 
-Tests whether functional EEG curves differ significantly between groups (ADHD vs
-non-ADHD) using pointwise Z-test, L2-norm test, F-type test, and permutation test.
+Tests whether functional EEG curves differ significantly between groups using pointwise
+Z-test, L2-norm test, F-type test, and permutation test (ADHD and gender), and
+functional one-way ANOVA (SES).
 
 - **Input:** `EDA/outputs/fd_smooth.rds`
-- **Output:** 4 PDF plots in `HT/outputs/`
+- **Output:** 10 PDF plots in `HT/outputs/`
 
-### Step 6 (optional): Compile presentations
+### Step 6: Regression
+
+```bash
+$ Rscript REG/FDA_regression.R
+```
+
+Fits a function-on-scalar regression model with ADHD status and gender as predictors.
+Also fits a Bayesian alternative using `bayes_fosr`.
+
+- **Input:** `EDA/outputs/fd_smooth.rds`
+- **Output:** 4 PDF plots in `REG/outputs/`
+
+### Step 7 (optional): Compile presentations
 
 ```bash
 $ latexmk -xelatex -interaction=nonstopmode -outdir=Presentations Presentations/presentation_1st.tex
@@ -259,6 +274,18 @@ $ latexmk -xelatex -interaction=nonstopmode -outdir=Presentations Presentations/
 
 The presentations use Beamer with XeLaTeX. If `latexmk` is unavailable, run
 `$ xelatex <file>.tex` twice manually.
+
+### Step 8 (optional): Compile final report
+
+```bash
+$ latexmk -pdf -interaction=nonstopmode -outdir=Reports Reports/final_report.tex
+```
+
+Compiles the JMLR-style final report. Figure assets are copied automatically from
+pipeline outputs by `make report`.
+
+- **Input:** `Reports/final_report.tex`, figure PDFs from EDA/HT/REG outputs
+- **Output:** `Reports/final_report.pdf`
 
 ### LaTeX troubleshooting
 
@@ -276,22 +303,33 @@ The presentations use Beamer with XeLaTeX. If `latexmk` is unavailable, run
 
 ```
 .
-├── ds006018/                      # Git submodule — raw EEG data (10+ GB via datalad)
+├── ds006018/                      # Cloned dataset repo — raw EEG data (10+ GB via datalad)
 ├── ds006018_per_stimuli/          # .gitignore — intermediate CSVs (50+ GB)
-├── ds006018_functional/           # .gitignore — F7 .rds files (unused)
+├── ds006018_functional/           # .gitignore — F7 .rds files (unused in main analysis)
 ├── EDA/
 │   ├── assemble_subject_flanker_S2_FC1.R  # Step 3: CSVs → subject matrix
-│   ├── Smoothing_and_EDA.R        # Step 4: smoothing + full EDA
-│   ├── Flanker_stimulus_FC1_channel.csv  # 62 subjects × 501 time points
-│   ├── subject_metadata.csv       # epoch counts per subject
-│   └── outputs/                   # All PDFs, fd_smooth.rds, text results
+│   ├── Smoothing_and_EDA.R                # Step 4: smoothing + full EDA
+│   ├── Flanker_stimulus_FC1_channel.csv   # 62 subjects × 501 time points
+│   ├── subject_metadata.csv               # epoch counts per subject
+│   └── outputs/                           # 30+ PDFs, fd_smooth.rds, text results
 ├── HT/
-│   ├── Hypothesis_testing_ADHD.R  # Step 5: functional hypothesis tests
-│   ├── trace.R                    # lecturer's helper functions
+│   ├── Hypothesis_testing_ADHD.R          # Step 5a: ADHD group comparison
+│   ├── Hypothesis_testing_Gender.R        # Step 5b: gender group comparison
+│   ├── Hypothesis_testing_SES.R           # Step 5c: SES one-way ANOVA
+│   ├── trace.R                            # lecturer's helper functions
 │   ├── Ztwosample.R
 │   ├── L2stattwosample.R
 │   ├── Fstattwosample.R
-│   └── outputs/                   # 4 PDF plots
+│   └── outputs/                           # 10 PDF plots
+├── REG/
+│   ├── FDA_regression.R                   # Step 6: function-on-scalar regression
+│   └── outputs/                           # 4 PDF plots
+├── Reports/
+│   ├── final_report.tex                   # LaTeX source
+│   ├── final_report.pdf                   # Compiled report
+│   ├── bibliography.bib                   # References
+│   ├── jmlr2e.sty                         # JMLR style file
+│   └── *.pdf                              # Figure assets copied from pipeline outputs
 ├── Notebooks/
 │   ├── 01_initial_data_exploration.ipynb  # demographics, participants.tsv
 │   ├── 02_data_analysis.ipynb             # early MNE exploration
@@ -299,17 +337,16 @@ The presentations use Beamer with XeLaTeX. If `latexmk` is unavailable, run
 │   ├── 04_data_preparation_R.ipynb        # F7 smoothing → .rds files
 │   ├── 05_read_data_R.ipynb               # .rds structure inspection
 │   └── 06_plot_data_R.ipynb               # visual checks of .rds files
-├── Presentations/                 # Beamer slides (presentation_1st.tex,
-│                                  #   presentation_2nd.tex, compiled PDFs)
-├── Slides/                        # University lecture slides (reference only)
-├── Practice/                      # University lab materials and our experiments
-├── Makefile                       # run `make help` for targets
-├── Functional-Data-Analysis.Rproj # RStudio project config
-├── renv.lock                      # R dependency versions
-├── requirements.txt               # Python dependencies
+├── Presentations/                         # Beamer slides (1st, 2nd; compiled PDFs)
+├── Slides/                                # University lecture slides (reference only)
+├── Practice/                              # University lab materials and experiments
+├── Makefile                               # run `make help` for targets
+├── Functional-Data-Analysis.Rproj         # RStudio project config
+├── renv.lock                              # R dependency versions
+├── requirements.txt                       # Python dependencies
 ├── .gitignore
-├── .gitmodules                    # ds006018 submodule reference
-├── .renvignore                    # files/folders renv should ignore
+├── .gitmodules                            # ds006018 submodule reference
+├── .renvignore                            # files/folders renv should ignore
 └── README.md
 ```
 
@@ -332,21 +369,24 @@ The presentations use Beamer with XeLaTeX. If `latexmk` is unavailable, run
 ## Make targets
 
 ```bash
-$ make help                 # Show all available targets
-$ make all                  # Run the full pipeline from scratch
-$ make deps                 # Install Python and R dependencies
-$ make export-requirements  # Export uv dependencies to requirements.txt
-$ make import-requirements  # Import requirements.txt into uv
-$ make data                 # Acquire raw EEG data via datalad
-$ make stimuli              # Raw EEG → per-stimulus CSVs (~40 min)
-$ make functional           # Generate F7 .rds files (optional, ~40 min)
-$ make assemble             # CSVs → subject matrix CSV
-$ make eda                  # Smoothing + full EDA
-$ make hypothesis_testing   # Functional hypothesis tests + plots
-$ make presentation_1       # Compile LaTeX slides for 1st presentation
-$ make presentation_2       # Compile LaTeX slides for 2nd presentation
-$ make clean                # Remove generated outputs
-$ make distclean            # Clean + remove all generated data folders
+$ make help                   # Show all available targets
+$ make all                    # Run the full pipeline from scratch
+$ make deps                   # Install Python and R dependencies
+$ make export-requirements    # Export uv dependencies to requirements.txt
+$ make import-requirements    # Import requirements.txt into uv
+$ make data                   # Acquire raw EEG data via datalad
+$ make stimuli                # Raw EEG → per-stimulus CSVs (~40 min)
+$ make functional             # Generate F7 .rds files (optional, ~40 min)
+$ make assemble               # CSVs → subject matrix CSV
+$ make eda                    # Smoothing + full EDA
+$ make hypothesis_testing     # Run all hypothesis testing scripts
+$ make regression             # Run regression analysis
+$ make presentation_1         # Compile LaTeX slides for 1st presentation
+$ make presentation_2         # Compile LaTeX slides for 2nd presentation
+$ make report                 # Compile final LaTeX report PDF
+$ make clean                  # Remove generated outputs
+$ make distclean              # Clean + remove all generated data folders
+$ make clean-env              # Remove Python venv and R library
 ```
 
 Full pipeline from scratch:

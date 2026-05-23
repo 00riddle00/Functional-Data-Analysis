@@ -53,12 +53,14 @@ REPORT          := $(REPORTS_DIR)/final_report.pdf
 
 # --- Phony targets -----------------------------------------------------------
 
-.PHONY: all deps deps-python deps-r sync-requirements sync-uv data stimuli functional assemble \
-	eda hypothesis_testing presentation_1 presentation_2 regression report clean distclean help
+.PHONY: all deps deps-python deps-r export-requirements import-requirements \
+	data stimuli functional assemble eda hypothesis_testing \
+	presentation_1 presentation_2 regression report \
+	clean distclean clean-env help
 
 # --- Default: full pipeline --------------------------------------------------
 
-all: deps data stimuli assemble eda hypothesis_testing presentation_1 presentation_2
+all: deps data stimuli assemble eda hypothesis_testing regression presentation_1 presentation_2 report
 	@echo ""
 	@echo "=== Full pipeline complete. ==="
 
@@ -76,11 +78,11 @@ help:
 	@echo "  make assemble             CSVs -> subject matrix CSV"
 	@echo "  make eda                  Smoothing + full EDA"
 	@echo "  make hypothesis_testing   Run all hypothesis testing scripts"
+	@echo "  make regression           Run regression analysis"
 	@echo "  make presentation_1       Compile LaTeX slides for 1st presentation"
 	@echo "  make presentation_2       Compile LaTeX slides for 2nd presentation"
-	@echo "  make regression           Run regression analyses"
 	@echo "  make report               Compile final LaTeX report PDF"
-	@echo "  make clean                Remove EDA outputs and presentation build files"
+	@echo "  make clean                Remove generated outputs"
 	@echo "  make distclean            Clean + remove all generated data folders (caution)"
 	@echo "  make clean-env            Remove Python venv and R library (for testing)"
 	@echo "  make help                 Show this message"
@@ -228,7 +230,15 @@ $(HT_PLOTS_SES): $(HT_DIR)/Hypothesis_testing_SES.R $(FD_SMOOTH)
 	$(RSCRIPT) $(HT_DIR)/Hypothesis_testing_SES.R
 	@echo "Hypothesis testing (SES) complete. Outputs in $(HT_OUT_DIR)/"
 
-# --- Step 7: LaTeX presentations ---------------------------------------------
+# --- Step 7: Regression ------------------------------------------------------
+
+regression: $(REG_PLOTS)
+
+$(REG_PLOTS): $(REG_DIR)/FDA_regression.R $(FD_SMOOTH)
+	$(RSCRIPT) $(REG_DIR)/FDA_regression.R
+	@echo "Regression complete. Outputs in $(REG_DIR)/outputs/"
+
+# --- Step 8: LaTeX presentations ---------------------------------------------
 
 presentation_1: $(PRESENTATION_1)
 
@@ -243,14 +253,6 @@ $(PRESENTATION_2): $(PRES_DIR)/presentation_2nd.tex $(HT_PLOTS)
 	cp $(HT_OUT_DIR)/*.pdf $(PRES_DIR)/ 2>/dev/null || true
 	$(LATEXMK) -xelatex -interaction=nonstopmode -outdir=$(PRES_DIR) $(PRES_DIR)/presentation_2nd.tex
 	@echo "Presentation compiled: $(PRESENTATION_2)"
-
-# --- Step 8: Regression ------------------------------------------------------
-
-regression: $(REG_PLOTS)
-
-$(REG_PLOTS): $(REG_DIR)/FDA_regression.R $(FD_SMOOTH)
-	$(RSCRIPT) $(REG_DIR)/FDA_regression.R
-	@echo "Regression complete. Outputs in $(REG_DIR)/outputs/"
 
 # --- Step 9: Final report ----------------------------------------------------
 
@@ -280,7 +282,7 @@ clean:
 	rm -f $(REPORTS_DIR)/*.pdf
 	rm -f $(SUBJECT_CSV) $(SUBJECT_META)
 	git clean -fdX -- $(PRES_DIR)
-	@echo "Cleaned EDA, HT outputs and presentation build files."
+	@echo "Cleaned EDA, HT, regression outputs, report, and presentation build files."
 
 # Caution: will remove all generated data folders, which are not tracked by Git.
 distclean: clean
