@@ -496,7 +496,6 @@ dev.off()
 cat("Saved: 14_pca_scores.pdf\n")
 
 # --- Perturbation plots ---
-# (from 3_PCA_for_FDA2026.R lines 24-39)
 
 c <- 2
 mn <- pcalist$meanfd
@@ -530,7 +529,6 @@ dev.off()
 cat("Saved: 15_pca_perturbation.pdf\n")
 
 # --- PCA reconstruction of first 5 subjects ---
-# (from 3_PCA_for_FDA2026.R lines 42-80)
 
 cairo_pdf(file.path(out_dir, "16_pca_reconstruction.pdf"), width = 12, height = 10,
           bg = "transparent")
