@@ -22,7 +22,6 @@ if (length(old_files) > 0) {
 
 library(fda)
 
-# Source lecturer's test functions
 source("./HT/trace.R")
 source("./HT/Ztwosample.R")
 source("./HT/L2stattwosample.R")
@@ -108,7 +107,6 @@ dev.off()
 
 # ==============================================================================
 # Test 1: Pointwise Z-test
-# (from Ztwosample.R)
 # ==============================================================================
 
 pdf(file.path(out_dir, "HT_03_pointwise_Ztest.pdf"), width = 10, height = 6)
@@ -126,7 +124,6 @@ cat("Time points where |Z| > critical:", sig_points, "out of", length(t_fine), "
 
 # ==============================================================================
 # Test 2: L2-norm-based test (naive method)
-# (from L2stattwosample.R)
 # ==============================================================================
 
 cat("\n=== L2-norm test (naive) ===\n")
@@ -138,7 +135,6 @@ cat("p-value:", stat_l2_naive$pvalue, "\n")
 
 # ==============================================================================
 # Test 3: L2-norm-based test (bootstrap method)
-# (from L2stattwosample.R)
 # ==============================================================================
 
 cat("\n=== L2-norm test (bootstrap, 500 replications) ===\n")
@@ -151,7 +147,6 @@ cat("p-value:", stat_l2_boot$pvalue, "\n")
 
 # ==============================================================================
 # Test 4: F-type test (naive method)
-# (from Fstattwosample.R)
 # ==============================================================================
 
 cat("\n=== F-type test (naive) ===\n")
@@ -163,7 +158,6 @@ cat("p-value:", stat_f_naive$pvalue, "\n")
 
 # ==============================================================================
 # Test 5: F-type test (bootstrap method)
-# (from Fstattwosample.R)
 # ==============================================================================
 
 cat("\n=== F-type test (bootstrap, 500 replications) ===\n")
@@ -176,7 +170,6 @@ cat("p-value:", stat_f_boot$pvalue, "\n")
 
 # ==============================================================================
 # Test 6: Permutation test
-# (from fda package: tperm.fd)
 # ==============================================================================
 
 cat("\n=== Permutation test (tperm.fd) ===\n")
