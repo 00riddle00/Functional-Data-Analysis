@@ -44,23 +44,23 @@
 \maketitle
 
 \begin{abstract}%   <- trailing '%' for backward compatibility of .sty file
-This paper describes a functional data analysis (FDA) study of electroencephalography (EEG) data
-recorded during a Flanker cognitive task. The dataset consists of 62 adults from the cognitive
-electrophysiology in socioeconomic context dataset, with EEG signals captured at electrode channel
-FC1 over the time window from $-0.2\,\mathrm{s}$ to $0.8\,\mathrm{s}$ relative to stimulus onset.
-The raw discrete observations were converted into smooth functional objects using a penalized
-B-spline basis smoothing. Exploratory data analysis was then performed, including descriptive
-statistics (mean, standard deviation, covariance), principal component analysis (PCA), and
-depth-based outlier detection methods. Hypothesis testing revealed no statistically significant
-differences between groups defined by ADHD status, gender, or socioeconomic status. A
-function-on-scalar regression model further identified a significant effect of gender on the EEG
-response shape, with female subjects exhibiting systematically lower amplitudes in the post-stimulus
-window.
+  This paper describes a functional data analysis (FDA) study of electroencephalography (EEG) data
+  recorded during a Flanker cognitive task. The dataset consists of 62 adults from the cognitive
+  electrophysiology in socioeconomic context dataset, with EEG signals captured at electrode channel
+  FC1 over the time window from $-0.2\,\mathrm{s}$ to $0.8\,\mathrm{s}$ relative to stimulus onset.
+  The raw discrete observations were converted into smooth functional objects using a penalized
+  B-spline basis smoothing. Exploratory data analysis was then performed, including descriptive
+  statistics (mean, standard deviation, covariance), principal component analysis (PCA), and
+  depth-based outlier detection methods. Hypothesis testing revealed no statistically significant
+  differences between groups defined by ADHD status, gender, or socioeconomic status. A
+  function-on-scalar regression model further identified a significant effect of gender on the EEG
+  response shape, with female subjects exhibiting systematically lower amplitudes in the
+  post-stimulus window.
 \end{abstract}
 
 \begin{keywords}
-Functional Data Analysis, EEG, Flanker task, B-spline smoothing, PCA, Boxplot, Outlier detection,
-Hypothesis testing, Regression
+  Functional Data Analysis, EEG, Flanker task, B-spline smoothing, PCA, Boxplot, Outlier detection,
+  Hypothesis testing, Regression
 \end{keywords}
 
 % -----------------------------------------------------------------------------
@@ -95,7 +95,7 @@ data from a cognitive electrophysiology experiment. The objectives are as follow
   \item To perform exploratory data analysis including computation of sample mean, standard
     deviation, and covariance functions.
   \item To identify dominant modes of variation among subjects using Principal Component Analysis
-      (PCA).
+    (PCA).
   \item To detect outlier subjects using functional boxplots and depth-based methods.
   \item To interpret the obtained results in the context of EEG signal analysis.
   \item To test for statistically significant differences in EEG response curves between groups
@@ -624,9 +624,9 @@ extract meaningful insights about functional structure, variability, and covaria
 % -----------------------------------------------------------------------------
 \section{Code Availability}
 
-The complete source code used for this project, including the R and Python
-implementations, data preprocessing scripts, statistical analyses, and LaTeX
-report source files, is publicly available at:
+The complete source code used for this project, including the R and Python implementations, data
+preprocessing scripts, statistical analyses, and LaTeX report source files, is publicly available
+at:
 
 \vspace{0.8\baselineskip}
 
@@ -634,8 +634,8 @@ report source files, is publicly available at:
 
 \vspace{0.8\baselineskip}
 
-Some FDA procedures were implemented primarily in R due to the greater maturity
-of FDA-related libraries in the R ecosystem.
+Some FDA procedures were implemented primarily in R due to the greater maturity of FDA-related
+libraries in the R ecosystem.
 
 % --------------------------------------------------------------------------------------
 \end{document}
