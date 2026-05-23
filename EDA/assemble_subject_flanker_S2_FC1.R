@@ -145,10 +145,10 @@ final_df <- data.frame(time = time_vec, Y_mat, check.names = FALSE)
 cat("Final matrix:", nrow(final_df), "time points ×",
     n_subjects, "subjects\n\n")
 
-write.csv(final_df, output_csv, row.names = FALSE)
+write.csv(final_df, output_csv, row.names = FALSE, quote = FALSE)
 cat("Saved:", output_csv, "\n")
 
-write.csv(metadata_df, "./EDA/subject_metadata.csv", row.names = FALSE)
+write.csv(metadata_df, "./EDA/subject_metadata.csv", row.names = FALSE, quote = FALSE)
 cat("Saved: ./EDA/subject_metadata.csv\n")
 
 cat("\n*** Done! All", n_subjects, "subjects with S2 flanker data. ***\n")
