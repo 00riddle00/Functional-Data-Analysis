@@ -180,6 +180,28 @@ $ make import-requirements
 
 ---
 
+### Makefile and stamp files
+
+The Makefile uses sentinel `.stamp` files to track whether long-running steps have
+already completed. If you have generated outputs from a previous run but the `.stamp`
+files are missing (e.g. after a fresh clone or a `git checkout`), `make` will re-run the
+corresponding steps unnecessarily. To prevent this, touch the relevant stamps manually:
+
+```bash
+touch ds006018_per_stimuli/.stamp
+touch EDA/Flanker_stimulus_FC1_channel.csv
+touch EDA/outputs/fd_smooth.rds
+touch HT/outputs/HT_01_group_comparison.pdf
+touch HT/outputs/HT_05_gender_group_comparison.pdf
+touch HT/outputs/HT_09_ses_group_comparison.pdf
+touch REG/outputs/REG_01_coefficients.pdf
+```
+
+This tells `make` that all pipeline outputs are up to date, so subsequent targets such
+as `make presentation_3` or `make report` will skip straight to compilation.
+
+---
+
 ## Pipeline
 
 The pipeline has 9 steps. Each depends on the output of the previous one. Run `$ make
@@ -494,6 +516,7 @@ $ make hypothesis_testing     # Run all hypothesis testing scripts
 $ make regression             # Run regression analysis
 $ make presentation_1         # Compile LaTeX slides for 1st presentation
 $ make presentation_2         # Compile LaTeX slides for 2nd presentation
+$ make presentation_3         # Compile LaTeX slides for 3rd presentation
 $ make report                 # Compile final LaTeX report PDF
 $ make clean                  # Remove generated outputs
 $ make distclean              # Clean + remove all generated data folders
