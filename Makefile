@@ -45,6 +45,7 @@ FUNC_DIR        := ds006018_functional
 RAW_DATA_DIR    := ds006018
 PRESENTATION_1  := $(PRES_DIR)/presentation_1st.pdf
 PRESENTATION_2  := $(PRES_DIR)/presentation_2nd.pdf
+PRESENTATION_3  := $(PRES_DIR)/presentation_3rd.pdf
 REG_DIR         := REG
 # REG_01 also tracks REG_02, REG_03, and REG_04.
 REG_PLOTS       := $(REG_DIR)/outputs/REG_01_coefficients.pdf
@@ -60,7 +61,8 @@ REPORT          := $(REPORTS_DIR)/final_report.pdf
 
 # --- Default: full pipeline --------------------------------------------------
 
-all: deps data stimuli assemble eda hypothesis_testing regression presentation_1 presentation_2 report
+all: deps data stimuli assemble eda hypothesis_testing regression presentation_1 presentation_2 \
+	presentation_3 report
 	@echo ""
 	@echo "=== Full pipeline complete. ==="
 
@@ -81,6 +83,7 @@ help:
 	@echo "  make regression           Run regression analysis"
 	@echo "  make presentation_1       Compile LaTeX slides for 1st presentation"
 	@echo "  make presentation_2       Compile LaTeX slides for 2nd presentation"
+	@echo "  make presentation_3       Compile LaTeX slides for 3rd presentation"
 	@echo "  make report               Compile final LaTeX report PDF"
 	@echo "  make clean                Remove generated outputs"
 	@echo "  make distclean            Clean + remove all generated data folders (caution)"
@@ -253,6 +256,16 @@ $(PRESENTATION_2): $(PRES_DIR)/presentation_2nd.tex $(HT_PLOTS)
 	cp $(HT_OUT_DIR)/*.pdf $(PRES_DIR)/ 2>/dev/null || true
 	$(LATEXMK) -xelatex -interaction=nonstopmode -outdir=$(PRES_DIR) $(PRES_DIR)/presentation_2nd.tex
 	@echo "Presentation compiled: $(PRESENTATION_2)"
+
+presentation_3: $(PRESENTATION_3)
+
+$(PRESENTATION_3): $(PRES_DIR)/presentation_3rd.tex $(REG_PLOTS) $(HT_PLOTS) $(HT_PLOTS_GENDER) $(HT_PLOTS_SES)
+	cp $(EDA_OUT_DIR)/*.pdf $(PRES_DIR)/ 2>/dev/null || true
+	cp $(HT_OUT_DIR)/*.pdf $(PRES_DIR)/ 2>/dev/null || true
+	cp $(REG_DIR)/outputs/*.pdf $(PRES_DIR)/ 2>/dev/null || true
+	$(LATEXMK) -xelatex -interaction=nonstopmode -outdir=$(PRES_DIR) \
+		$(PRES_DIR)/presentation_3rd.tex
+	@echo "Presentation compiled: $(PRESENTATION_3)"
 
 # --- Step 9: Final report ----------------------------------------------------
 
