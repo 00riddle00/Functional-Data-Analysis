@@ -169,6 +169,17 @@ $ make import-requirements
 
 ---
 
+## Important Notes
+
+- `ds006018/` is a cloned dataset repository
+  (https://github.com/OpenNeuroDatasets/ds006018.git). It is not tracked by this
+  repository and should not be committed.
+- `ds006018_per_stimuli/` is in `.gitignore` (54 GB). Regenerate from step 2.
+- `ds006018_functional/` is in `.gitignore`. Contains F7-channel .rds files. Currently
+  unused — the main analysis uses FC1 extracted directly from the CSVs.
+
+---
+
 ## Pipeline
 
 The pipeline has 9 steps. Each depends on the output of the previous one. Run `$ make
@@ -310,6 +321,14 @@ pipeline outputs by `make report`.
 
 ---
 
+## Analysis Notes
+
+- The analysis uses **channel FC1** (frontal-central, relevant for attentional conflict
+  processing in the Flanker task) and **stimulus S2**.
+- 62 subjects had flanker S2 data: 55 with 1 trial, 7 with 2 trials (averaged).
+
+---
+
 ## Folder structure
 
 ```
@@ -437,20 +456,6 @@ unaffected and matches the R output correctly. The root cause is under
 investigation — likely a subtle incompatibility between scikit-fda's `BandDepth`
 implementation and the specific data structure used. The MBD-based analyses
 (functional boxplots, outlier detection) are not affected.
-
----
-
-## Notes
-
-- `ds006018/` is a cloned dataset repository
-  (https://github.com/OpenNeuroDatasets/ds006018.git). It is not tracked by this
-  repository and should not be committed.
-- `ds006018_per_stimuli/` is in `.gitignore` (54 GB). Regenerate from step 2.
-- `ds006018_functional/` is in `.gitignore`. Contains F7-channel .rds files. Currently
-  unused — the main analysis uses FC1 extracted directly from the CSVs.
-- The analysis uses **channel FC1** (frontal-central, relevant for attentional conflict
-  processing in the Flanker task) and **stimulus S2**.
-- 62 subjects had flanker S2 data: 55 with 1 trial, 7 with 2 trials (averaged).
 
 ---
 
