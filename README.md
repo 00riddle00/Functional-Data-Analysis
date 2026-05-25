@@ -49,18 +49,18 @@ For individual steps, run `$ make help`.
 - **Windows:** https://git-scm.com/download/win — after install, run: `$ git config
   --global core.longpaths true`
 
+### R (4.5+)
+
+- **Linux:** https://cran.r-project.org/bin/linux/ (follow distro-specific instructions)
+- **macOS:** https://cran.r-project.org/bin/macosx/
+- **Windows:** https://cran.r-project.org/bin/windows/base/
+
 ### Python (3.14+)
 
 - **Linux:** `$ sudo apt install python3 python3-venv python3-pip` (or use your distro's
   package manager)
 - **macOS:** `$ brew install python`
 - **Windows:** https://www.python.org — check "Add to PATH" during install
-
-### R (4.5+)
-
-- **Linux:** https://cran.r-project.org/bin/linux/ (follow distro-specific instructions)
-- **macOS:** https://cran.r-project.org/bin/macosx/
-- **Windows:** https://cran.r-project.org/bin/windows/base/
 
 ### DataLad and git-annex
 
@@ -92,9 +92,9 @@ $ sudo apt install libcurl4-openssl-dev libssl-dev libxml2-dev libfontconfig1-de
   libharfbuzz-dev libfribidi-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev
 ```
 
-### Jupyter R kernel (optional)
+### Jupyter R kernel
 
-Only needed to run R-based notebooks in Jupyter. Run in R console:
+Needed to run R-based notebooks in Jupyter. Run in R console:
 
 ```r
 > install.packages("IRkernel")
@@ -107,9 +107,9 @@ IRkernel::installspec(
 This creates a project-specific kernel name. Renv activation is handled by the first
 cell in each R notebook.
 
-### Make (optional)
+### Make
 
-Needed if you want to use the Makefile for automation.
+Needed to use the Makefile for automation.
 
 - **Linux:** Usually pre-installed. If not: `$ sudo apt install make`
 - **macOS:** Included with Xcode command line tools (`$ xcode-select --install`) or just
@@ -131,6 +131,15 @@ $ git clone https://github.com/OpenNeuroDatasets/ds006018
 ```
 
 ### Install dependencies
+
+**R:**
+
+Run in R console:
+
+```r
+> install.packages("renv")
+> renv::restore()
+```
 
 **Python:**
 
@@ -156,15 +165,6 @@ After changing dependencies with pip and updating `requirements.txt`, run:
 
 ```bash
 $ make import-requirements
-```
-
-**R:**
-
-Run in R console:
-
-```r
-> install.packages("renv")
-> renv::restore()
 ```
 
 ---
@@ -276,7 +276,7 @@ Also fits a Bayesian alternative using `bayes_fosr`.
 - **Input:** `EDA/outputs/fd_smooth.rds`
 - **Output:** 4 PDF plots in `REG/outputs/`
 
-### Step 7 (optional): Compile presentations
+### Step 7: Compile presentations
 
 ```bash
 $ latexmk -xelatex -interaction=nonstopmode -outdir=Presentations Presentations/presentation_1st.tex
@@ -286,7 +286,7 @@ $ latexmk -xelatex -interaction=nonstopmode -outdir=Presentations Presentations/
 The presentations use Beamer with XeLaTeX. If `latexmk` is unavailable, run
 `$ xelatex <file>.tex` twice manually.
 
-### Step 8 (optional): Compile final report
+### Step 8: Compile final report
 
 ```bash
 $ latexmk -pdf -interaction=nonstopmode -outdir=Reports Reports/final_report.tex
