@@ -384,12 +384,13 @@ pipeline outputs by `make report`.
 
 ## R / Python Pipeline
 
+- R code lives in:
+  - `.R` files
+  - `.ipynb` notebooks that necessarily end in `_R.ipynb` (e.g.
+    `03_data_preparation_R.ipynb`)
 - Python code lives in:
   - `.py` files
   - `.ipynb` notebooks with regular naming (e.g. `03_data_preparation.ipynb`)
-- R code lives in:
-  - `.R` files
-  - `.ipynb` notebooks that necessarily end in `_R.ipynb` (e.g. `03_data_preparation_R.ipynb`)
 
 ### Compatibility Notes
 
