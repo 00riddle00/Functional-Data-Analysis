@@ -373,6 +373,13 @@ pipeline outputs by `make report`.
 - The analysis uses **channel FC1** (frontal-central, relevant for attentional conflict
   processing in the Flanker task) and **stimulus S2**.
 - 62 subjects had flanker S2 data: 55 with 1 trial, 7 with 2 trials (averaged).
+- Python code lives in:
+  - `.py` files
+  - `.ipynb` notebooks with regular naming (e.g. `03_data_preparation.ipynb`)
+- R code lives in:
+  - `.R` files
+  - `.ipynb` notebooks that necessarily end in `_R.ipynb` (e.g.
+    `03_data_preparation_R.ipynb`)
 
 ---
 
