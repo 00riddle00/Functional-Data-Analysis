@@ -333,50 +333,67 @@ pipeline outputs by `make report`.
 
 ```
 .
-├── ds006018/                      # Cloned dataset repo — raw EEG data (10+ GB via datalad)
-├── ds006018_per_stimuli/          # .gitignore — intermediate CSVs (50+ GB)
-├── ds006018_functional/           # .gitignore — F7 .rds files (unused in main analysis)
+├── ds006018/                                  # Cloned dataset repo — raw EEG data (10+ GB via datalad)
+├── ds006018_per_stimuli/                      # .gitignore — intermediate CSVs (50+ GB)
+├── ds006018_functional/                       # .gitignore — F7 functional data objects (.rds and .pkl) (unused in main analysis)
 ├── EDA/
-│   ├── assemble_subject_flanker_S2_FC1.R  # Step 3: CSVs → subject matrix
-│   ├── Smoothing_and_EDA.R                # Step 4: smoothing + full EDA
-│   ├── Flanker_stimulus_FC1_channel.csv   # 62 subjects × 501 time points
-│   ├── subject_metadata.csv               # epoch counts per subject
-│   └── outputs/                           # 30+ PDFs, fd_smooth.rds, text results
+│   ├── assemble_subject_flanker_S2_FC1.R      # Step 3 (R): CSVs → subject matrix
+│   ├── assemble_subject_flanker_S2_FC1.ipynb  # Step 3 (Python): CSVs → subject matrix
+│   ├── Smoothing_and_EDA.R                    # Step 4 (R): smoothing + full EDA
+│   ├── Smoothing_and_EDA.ipynb                # Step 4 (Python): smoothing + full EDA
+│   ├── Flanker_stimulus_FC1_channel.csv       # 62 subjects × 501 time points
+│   ├── subject_metadata.csv                   # epoch counts per subject
+│   └── outputs/                               # 30+ PDFs, fd_smooth.rds, fd_smooth.pkl, text results
 ├── HT/
-│   ├── Hypothesis_testing_ADHD.R          # Step 5a: ADHD group comparison
-│   ├── Hypothesis_testing_Gender.R        # Step 5b: gender group comparison
-│   ├── Hypothesis_testing_SES.R           # Step 5c: SES one-way ANOVA
-│   ├── trace.R                            # lecturer's helper functions
-│   ├── Ztwosample.R
-│   ├── L2stattwosample.R
-│   ├── Fstattwosample.R
-│   └── outputs/                           # 10 PDF plots
+│   ├── Hypothesis_testing_ADHD.R              # Step 5a (R): ADHD group comparison
+│   ├── Hypothesis_testing_ADHD.ipynb          # Step 5a (Python): ADHD group comparison
+│   ├── Hypothesis_testing_Gender.R            # Step 5b (R): gender group comparison
+│   ├── Hypothesis_testing_Gender.ipynb        # Step 5b (Python): gender group comparison
+│   ├── Hypothesis_testing_SES.R               # Step 5c (R): SES one-way ANOVA
+│   ├── Hypothesis_testing_SES.ipynb           # Step 5c (Python): SES one-way ANOVA
+│   ├── trace.R                                # helper functions (R)
+│   ├── trace.py                               # helper functions (Python)
+│   ├── Ztwosample.R                           # helper functions (R)
+│   ├── z_two_sample.py                        # helper functions (Python)
+│   ├── L2stattwosample.R                      # helper functions (R)
+│   ├── l2_stat_two_sample.py                  # helper functions (Python)
+│   ├── Fstattwosample.R                       # helper functions (R)
+│   ├── f_stat_two_sample.py                   # helper functions (Python)
+│   └── outputs/                               # 10 PDF plots
 ├── REG/
-│   ├── FDA_regression.R                   # Step 6: function-on-scalar regression
-│   └── outputs/                           # 4 PDF plots
+│   ├── FDA_regression.R                       # Step 6 (R): function-on-scalar regression
+│   ├── FDA_regression.ipynb                   # Step 6 (Python): function-on-scalar regression
+│   └── outputs/                               # 4 PDF plots
 ├── Reports/
-│   ├── final_report.tex                   # LaTeX source
-│   ├── final_report.pdf                   # Compiled report
-│   ├── bibliography.bib                   # References
-│   ├── jmlr2e.sty                         # JMLR style file
-│   └── *.pdf                              # Figure assets copied from pipeline outputs
+│   ├── final_report.tex                       # LaTeX source
+│   ├── final_report.pdf                       # Compiled report
+│   ├── bibliography.bib                       # References
+│   ├── jmlr2e.sty                             # JMLR style file
+│   └── *.pdf                                  # Figure assets copied from pipeline outputs
 ├── Notebooks/
-│   ├── 01_initial_data_exploration.ipynb  # demographics, participants.tsv
-│   ├── 02_data_analysis.ipynb             # early MNE exploration
-│   ├── 03_data_preparation.ipynb          # Step 2: raw EEG → per-stimulus CSVs
-│   ├── 04_data_preparation_R.ipynb        # F7 smoothing → .rds files
-│   ├── 05_read_data_R.ipynb               # .rds structure inspection
-│   └── 06_plot_data_R.ipynb               # visual checks of .rds files
-├── Presentations/                         # Beamer slides (1st, 2nd; compiled PDFs)
-├── Slides/                                # University lecture slides (reference only)
-├── Practice/                              # University lab materials and experiments
-├── Makefile                               # run `make help` for targets
-├── Functional-Data-Analysis.Rproj         # RStudio project config
-├── renv.lock                              # R dependency versions
-├── requirements.txt                       # Python dependencies
+│   ├── 01_initial_data_exploration.ipynb      # demographics, participants.tsv (Python)
+│   ├── 01_initial_data_exploration_R.ipynb    # demographics, participants.tsv (R)
+│   ├── 02_data_analysis.ipynb                 # early MNE exploration (Python)
+│   ├── 02_data_analysis_R.ipynb               # early MNE exploration (R)
+│   ├── 03_data_preparation.ipynb              # Step 2 (Python): raw EEG → per-stimulus CSVs
+│   ├── 03_data_preparation_R.ipynb            # Step 2 (R): raw EEG → per-stimulus CSVs
+│   ├── 04_data_preparation.ipynb              # F7 smoothing → .pkl files (Python)
+│   ├── 04_data_preparation_R.ipynb            # F7 smoothing → .rds files (R)
+│   ├── 05_read_data.ipynb                     # .pkl structure inspection (Python)
+│   ├── 05_read_data_R.ipynb                   # .rds structure inspection (R)
+│   ├── 06_plot_data.ipynb                     # visual checks of .pkl files (Python)
+│   ├── 06_plot_data_R.ipynb                   # visual checks of .rds files (R)
+│   ├── 07_participants_eda.ipynb              # participants EDA (Python)
+│   └── 07_participants_eda_R.ipynb            # participants EDA (R)
+├── Presentations/                             # Beamer slides (1st, 2nd, 3rd; compiled PDFs)
+├── Practice/                                  # University lab materials and experiments
+├── Makefile                                   # run `make help` for targets
+├── Functional-Data-Analysis.Rproj             # RStudio project config
+├── renv.lock                                  # R dependency versions
+├── requirements.txt                           # Python dependencies
 ├── .gitignore
-├── .gitmodules                            # ds006018 submodule reference
-├── .renvignore                            # files/folders renv should ignore
+├── .gitmodules                                # ds006018 submodule reference
+├── .renvignore                                # files/folders renv should ignore
 └── README.md
 ```
 
